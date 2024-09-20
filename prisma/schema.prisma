@@ -1,20 +1,47 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
-    provider = "prisma-client-js"
+  provider = "prisma-client-js"
 }
 
 datasource db {
-    provider = "sqlite"
-    url      = env("DATABASE_URL")
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
 }
 
-model Post {
-    id        Int      @id @default(autoincrement())
-    name      String
-    createdAt DateTime @default(now())
-    updatedAt DateTime @updatedAt
+model datosUdae {
+  id                              String  @id @default(auto()) @map("_id") @db.ObjectId
+  actoAdministrativoModificatorio String?
+  anioActoAdministrativo          Int?
+  circuitoJudicial                String
+  codigoInterno                   Int?
+  consejoSeccional                String
+  denominacionInicial             String?
+  dependencia                     String
+  descripcionCargo                String
+  direccionSeccional              String
+  distritoJudicial                String
+  especialidad                    String
+  gradoCargo                      String
+  gradoInicial                    String?
+  municipioSedeFisica             String
+  nombreDespacho                  String
+  numero                          Int
+  numeroActoAdministrativo        String?
+  observaciones                   String?
+  subespecialidad                 String
+  tipoActoAdministrativo          String?
+}
 
-    @@index([name])
+model datosCsj {
+  id             String  @id @default(auto()) @map("_id") @db.ObjectId
+  cargo          String
+  circuito       String
+  codigoDespacho String
+  despacho       String
+  documento      String?
+  estadoActual   String
+  genero         String?
+  municipio      String
+  nivel          String?
+  numero         Int
+  propiedad      String?
 }
