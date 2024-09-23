@@ -8,6 +8,7 @@ import { renderActiveFilters } from './active-filters'
 import { renderFilterForm } from './filter-form'
 import { renderTable } from './table'
 import { DatosCsjRow, DatosUdaeRow, FilterItem, ITEMS_PER_PAGE, TableColumn } from './types'
+import { api } from '~/trpc/react'
 
 type PairingPropTypes = {
   leftData: DatosUdaeRow[]
@@ -25,7 +26,12 @@ export default function Pairing({ leftData, leftColumns, rightData, rightColumns
   const [leftPage, setLeftPage] = useState(1)
   const [rightPage, setRightPage] = useState(1)
 
-  if (!leftData) return null
+  const utils = api.useUtils()
+  const { mutate } = api.cargos.savePairUdaeCsj.useMutation({
+    onSuccess: () => {
+      utils.cargos.getPairingData.invalidate()
+    },
+  })
 
   const filterData = (data: any[], filters: FilterItem[]) => {
     return data.filter((item) =>
@@ -39,14 +45,6 @@ export default function Pairing({ leftData, leftColumns, rightData, rightColumns
   const paginatedLeftData = filteredLeftData.slice((leftPage - 1) * ITEMS_PER_PAGE, leftPage * ITEMS_PER_PAGE)
   const paginatedRightData = filteredRightData.slice((rightPage - 1) * ITEMS_PER_PAGE, rightPage * ITEMS_PER_PAGE)
 
-  const handlePair = () => {
-    if (selectedLeft && selectedRight) {
-      setPairs([...pairs, { left: selectedLeft, right: selectedRight }])
-      setSelectedLeft(null)
-      setSelectedRight(null)
-    }
-  }
-
   const addLeftFilter = (filterItem: FilterItem) => {
     setLeftFilters([...leftFilters, filterItem])
   }
@@ -58,6 +56,10 @@ export default function Pairing({ leftData, leftColumns, rightData, rightColumns
   }
   const removeRightFilter = (filterItem: FilterItem) => {
     setRightFilters(rightFilters.filter(({ column }) => column !== filterItem.column))
+  }
+
+  const handlePair = () => {
+    selectedLeft && selectedRight && mutate({ udaeRowId: selectedLeft.id, csjId: selectedRight.id })
   }
 
   return (

@@ -8,7 +8,7 @@ datasource db {
 }
 
 model datosUdae {
-  id                              String  @id @default(auto()) @map("_id") @db.ObjectId
+  id                              String    @id @default(auto()) @map("_id") @db.ObjectId
   actoAdministrativoModificatorio String?
   anioActoAdministrativo          Int?
   circuitoJudicial                String
@@ -29,10 +29,12 @@ model datosUdae {
   observaciones                   String?
   subespecialidad                 String
   tipoActoAdministrativo          String?
+  datosCsjId                      String?    @unique @db.ObjectId
+  datosCsj                        datosCsj? @relation(fields: [datosCsjId], references: [id])
 }
 
 model datosCsj {
-  id             String  @id @default(auto()) @map("_id") @db.ObjectId
+  id             String      @id @default(auto()) @map("_id") @db.ObjectId
   cargo          String
   circuito       String
   codigoDespacho String
@@ -44,4 +46,5 @@ model datosCsj {
   nivel          String?
   numero         Int
   propiedad      String?
+  datosUdae      datosUdae[]
 }
