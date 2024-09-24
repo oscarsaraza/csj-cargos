@@ -1,14 +1,12 @@
 'use client'
 
-import { useMemo, useState } from 'react'
+import { useState } from 'react'
 import { Button } from '~/components/ui/button'
-import { ScrollArea } from '~/components/ui/scroll-area'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
+import { api } from '~/trpc/react'
 import { renderActiveFilters } from './active-filters'
 import { renderFilterForm } from './filter-form'
 import { renderTable } from './table'
 import { DatosCsjRow, DatosUdaeRow, FilterItem, ITEMS_PER_PAGE, TableColumn } from './types'
-import { api } from '~/trpc/react'
 
 type PairingPropTypes = {
   leftData: DatosUdaeRow[]
@@ -17,19 +15,31 @@ type PairingPropTypes = {
   rightColumns: TableColumn[]
 }
 
-export default function Pairing({ leftData, leftColumns, rightData, rightColumns }: PairingPropTypes) {
+export default function Pairing() {
+  const { data, error } = api.cargos.getPairingDataCsj.useQuery()
+  if (!data || error) return null
+
+  const { datosUdae, columnsUdae, datosCsj, columnsCsj } = data
+  return <PairingDumb leftData={datosUdae} leftColumns={columnsUdae} rightData={datosCsj} rightColumns={columnsCsj} />
+}
+
+function PairingDumb({ leftData, leftColumns, rightData, rightColumns }: PairingPropTypes) {
   const [leftFilters, setLeftFilters] = useState<FilterItem[]>([])
   const [rightFilters, setRightFilters] = useState<FilterItem[]>([])
   const [selectedLeft, setSelectedLeft] = useState<DatosUdaeRow | null>(null)
   const [selectedRight, setSelectedRight] = useState<DatosCsjRow | null>(null)
-  const [pairs, setPairs] = useState<{ left: DatosUdaeRow; right: DatosCsjRow }[]>([])
   const [leftPage, setLeftPage] = useState(1)
   const [rightPage, setRightPage] = useState(1)
 
   const utils = api.useUtils()
   const { mutate } = api.cargos.savePairUdaeCsj.useMutation({
     onSuccess: () => {
-      utils.cargos.getPairingData.invalidate()
+      utils.cargos.getPairingDataCsj.invalidate()
+      setSelectedLeft(null)
+      setSelectedRight(null)
+    },
+    onError: (error) => {
+      console.log(error)
     },
   })
 
@@ -39,8 +49,8 @@ export default function Pairing({ leftData, leftColumns, rightData, rightColumns
     )
   }
 
-  const filteredLeftData = useMemo(() => filterData(leftData, leftFilters), [leftFilters])
-  const filteredRightData = useMemo(() => filterData(rightData, rightFilters), [rightFilters])
+  const filteredLeftData = filterData(leftData, leftFilters)
+  const filteredRightData = filterData(rightData, rightFilters)
 
   const paginatedLeftData = filteredLeftData.slice((leftPage - 1) * ITEMS_PER_PAGE, leftPage * ITEMS_PER_PAGE)
   const paginatedRightData = filteredRightData.slice((rightPage - 1) * ITEMS_PER_PAGE, rightPage * ITEMS_PER_PAGE)
@@ -82,27 +92,6 @@ export default function Pairing({ leftData, leftColumns, rightData, rightColumns
         <Button onClick={handlePair} disabled={!selectedLeft || !selectedRight}>
           Emparejar
         </Button>
-      </div>
-      <div>
-        <h2 className="mb-2 text-xl font-bold">Registros emparejados</h2>
-        <ScrollArea className="h-48 rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>UDAE</TableHead>
-                <TableHead>CSJ</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {pairs.map((pair, index) => (
-                <TableRow key={index}>
-                  <TableCell>{pair.left.descripcionCargo}</TableCell>
-                  <TableCell>{pair.right.cargo}</TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </ScrollArea>
       </div>
     </div>
   )

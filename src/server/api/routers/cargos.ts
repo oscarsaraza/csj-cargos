@@ -12,22 +12,16 @@ const getModelColumns = ({ fields }: (typeof Prisma.dmmf.datamodel.models)[0]) =
   fields.map(({ name, type }) => ({ name, type, prettyName: getColumnPrettyName(name) }))
 
 export const cargosRouter = createTRPCRouter({
-  getPairingData: protectedProcedure.query(async ({ ctx }) => {
-    const datosUdae = await ctx.db.datosUdae.findMany({
-      where: { datosCsjId: { isSet: false } },
-      orderBy: { numero: 'asc' },
-    })
+  getPairingDataCsj: protectedProcedure.query(async ({ ctx }) => {
+    const datosUdae = await ctx.db.datosUdae.findMany({ where: { enlaceCsj: null }, orderBy: { numero: 'asc' } })
     const modelUdae = Prisma.dmmf.datamodel.models.find(({ name }) => name === 'DatosUdae')
     const columnsUdae = modelUdae ? getModelColumns(modelUdae) : []
 
-    const datosCsj = await ctx.db.datosCsj.findMany({
-      include: { datosUdae: true },
-      orderBy: { numero: 'asc' },
-    })
+    const datosCsj = await ctx.db.datosCsj.findMany({ where: { enlace: null }, orderBy: { numero: 'asc' } })
     const modelCsj = Prisma.dmmf.datamodel.models.find(({ name }) => name === 'DatosCsj')
     const columnsCsj = modelCsj ? getModelColumns(modelCsj) : []
 
-    return { datosUdae, columnsUdae, datosCsj: datosCsj.filter((d) => d.datosUdae.length === 0), columnsCsj }
+    return { datosUdae, columnsUdae, datosCsj, columnsCsj }
   }),
 
   savePairUdaeCsj: protectedProcedure
@@ -38,9 +32,14 @@ export const cargosRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ ctx, input }) => {
-      const result = await ctx.db.datosUdae.update({
-        where: { id: input.udaeRowId },
-        data: { datosCsjId: input.csjId },
+      const csj = await ctx.db.datosCsj.findUnique({ where: { id: input.csjId }, include: { enlace: true } })
+      if (csj?.enlace) throw new Error('El registro del CSJ ya se encuentra asociado a un registro de la UDAE.')
+
+      const udae = await ctx.db.datosUdae.findUnique({ where: { id: input.udaeRowId }, include: { enlaceCsj: true } })
+      if (udae?.enlaceCsj) throw new Error('El registro de la UDAE ya se encuentra asociado a un registro del CSJ.')
+
+      const result = await ctx.db.enlaceCsj.create({
+        data: { datosUdaeId: input.udaeRowId, datosCsjId: input.csjId, userId: ctx.user.userId },
       })
 
       return result
