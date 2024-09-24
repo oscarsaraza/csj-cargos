@@ -1,6 +1,6 @@
 import { Prisma } from '@prisma/client'
 import { z } from 'zod'
-import { createTRPCRouter, publicProcedure } from '~/server/api/trpc'
+import { createTRPCRouter, protectedProcedure } from '~/server/api/trpc'
 
 const getColumnPrettyName = (columnName: string) =>
   columnName
@@ -12,11 +12,10 @@ const getModelColumns = ({ fields }: (typeof Prisma.dmmf.datamodel.models)[0]) =
   fields.map(({ name, type }) => ({ name, type, prettyName: getColumnPrettyName(name) }))
 
 export const cargosRouter = createTRPCRouter({
-  getPairingData: publicProcedure.query(async ({ ctx }) => {
+  getPairingData: protectedProcedure.query(async ({ ctx }) => {
     const datosUdae = await ctx.db.datosUdae.findMany({
       where: { datosCsjId: { isSet: false } },
       orderBy: { numero: 'asc' },
-      take: 5,
     })
     const modelUdae = Prisma.dmmf.datamodel.models.find(({ name }) => name === 'DatosUdae')
     const columnsUdae = modelUdae ? getModelColumns(modelUdae) : []
@@ -24,7 +23,6 @@ export const cargosRouter = createTRPCRouter({
     const datosCsj = await ctx.db.datosCsj.findMany({
       include: { datosUdae: true },
       orderBy: { numero: 'asc' },
-      take: 5,
     })
     const modelCsj = Prisma.dmmf.datamodel.models.find(({ name }) => name === 'DatosCsj')
     const columnsCsj = modelCsj ? getModelColumns(modelCsj) : []
@@ -32,7 +30,7 @@ export const cargosRouter = createTRPCRouter({
     return { datosUdae, columnsUdae, datosCsj: datosCsj.filter((d) => d.datosUdae.length === 0), columnsCsj }
   }),
 
-  savePairUdaeCsj: publicProcedure
+  savePairUdaeCsj: protectedProcedure
     .input(
       z.object({
         udaeRowId: z.string(),

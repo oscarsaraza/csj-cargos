@@ -1,13 +1,14 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useFormState } from 'react-dom'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '~/components/ui/card'
 import { Input } from '~/components/ui/input'
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '~/components/ui/input-otp'
 import { Label } from '~/components/ui/label'
-import { api } from '~/trpc/react'
+import { loginWithCodeAction, requestLoginAction } from './actions'
 
 export default function Page() {
   const [username, setUsername] = useState('')
@@ -15,31 +16,35 @@ export default function Page() {
   const [loginRequested, setLoginRequested] = useState(false)
   const router = useRouter()
 
-  const requestLogin = api.users.requestLogin.useMutation({
-    onSuccess: () => {
-      setLoginRequested(true)
-    },
-  })
+  const [requestStateLogin, requestLogin] = useFormState(requestLoginAction, { username })
+  const [loginWithCodeState, loginWithCode] = useFormState(loginWithCodeAction, { success: false })
 
-  const loginWithCode = api.users.loginWithCode.useMutation({
-    onSuccess: () => {
-      router.push('/')
-    },
-  })
+  useEffect(() => {
+    setLoginRequested(Boolean(requestStateLogin.username))
+  }, [requestStateLogin])
+
+  useEffect(() => {
+    if (loginWithCodeState.success) router.push('/')
+  }, [loginWithCodeState])
 
   const onRequestLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    requestLogin.mutate({ username })
+    const formData = new FormData()
+    formData.append('username', username)
+    requestLogin(formData)
   }
 
   const onLoginWithCodeSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    loginWithCode.mutate({ username, code })
+    const formData = new FormData()
+    formData.append('username', username)
+    formData.append('code', code)
+    loginWithCode(formData)
   }
 
-  if (loginRequested)
-    return <LoginWithCode username={username} code={code} setCode={setCode} onSubmit={onLoginWithCodeSubmit} />
-  return <RequestLogin username={username} setUsername={setUsername} onSubmit={onRequestLoginSubmit} />
+  if (!loginRequested)
+    return <RequestLogin username={username} setUsername={setUsername} onSubmit={onRequestLoginSubmit} />
+  return <LoginWithCode username={username} code={code} setCode={setCode} onSubmit={onLoginWithCodeSubmit} />
 }
 
 function RequestLogin({

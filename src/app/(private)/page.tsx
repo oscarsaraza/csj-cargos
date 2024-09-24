@@ -1,15 +1,7 @@
 import { api, HydrateClient } from '~/trpc/server'
-import Pairing from './_components/pairing'
-import { lucia, validateSession } from '~/lib/auth'
-import { cookies } from 'next/headers'
-import { redirect } from 'next/navigation'
+import Pairing from '~/app/_components/pairing'
 
 export default async function Home() {
-  const sessionId = cookies().get(lucia.sessionCookieName)?.value ?? ''
-  const result = await validateSession(sessionId)
-
-  if (!result.session) redirect('/login')
-
   const { datosUdae, columnsUdae, datosCsj, columnsCsj } = await api.cargos.getPairingData()
 
   return (

@@ -4,6 +4,7 @@ import dayjs from 'dayjs'
 import { Cookie, Lucia } from 'lucia'
 import { db } from '~/server/db'
 import { sendEmail } from '../email'
+import { cookies } from 'next/headers'
 
 const adapter = new PrismaAdapter(db.session, db.user)
 
@@ -90,20 +91,26 @@ export const loginWithCode = async (
   return { success: true, sessionCookie }
 }
 
-export const validateSession = async (sessionId: string) => {
+export const logout = async () => {
+  const authCookie = lucia.createBlankSessionCookie()
+  cookies().set(authCookie.name, authCookie.value, authCookie.attributes)
+}
+
+export const validateSession = async () => {
+  let authCookie = cookies().get(lucia.sessionCookieName)
+  if (!authCookie) return { success: false, message: 'Sesión no válida.' }
+
+  const { name, value } = authCookie
+  const sessionId = lucia.readSessionCookie(`${name}=${value}`)
   if (!sessionId) return { success: false, message: 'Sesión no válida.' }
 
-  const { session, user } = await lucia.validateSession(sessionId)
+  const { user, session } = await lucia.validateSession(sessionId)
 
   if (session && session.fresh) {
-    const sessionCookie = lucia.createSessionCookie(session.id)
-    return { success: true, sessionCookie, user, session }
+    authCookie = lucia.createSessionCookie(sessionId)
+  } else if (!session) {
+    authCookie = lucia.createBlankSessionCookie()
   }
 
-  if (!session) {
-    const sessionCookie = lucia.createBlankSessionCookie()
-    return { success: true, sessionCookie, user, session }
-  }
-
-  return { success: false, message: 'Sesión no válida.' }
+  return { success: true, authCookie, user, session }
 }
