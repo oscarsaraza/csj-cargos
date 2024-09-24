@@ -4,9 +4,9 @@ import { useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { api } from '~/trpc/react'
 import { renderActiveFilters } from './active-filters'
-import { renderFilterForm } from './filter-form'
+import { FilterForm } from './filter-form'
 import { renderTable } from './table'
-import { DatosCsjRow, DatosUdaeRow, FilterItem, ITEMS_PER_PAGE, TableColumn } from './types'
+import { type DatosCsjRow, type DatosUdaeRow, type FilterItem, ITEMS_PER_PAGE, type TableColumn } from './types'
 
 type PairingPropTypes = {
   leftData: DatosUdaeRow[]
@@ -33,8 +33,8 @@ function PairingDumb({ leftData, leftColumns, rightData, rightColumns }: Pairing
 
   const utils = api.useUtils()
   const { mutate } = api.cargos.savePairUdaeCsj.useMutation({
-    onSuccess: () => {
-      utils.cargos.getPairingDataCsj.invalidate()
+    onSuccess: async () => {
+      await utils.cargos.getPairingDataCsj.invalidate()
       setSelectedLeft(null)
       setSelectedRight(null)
     },
@@ -69,7 +69,7 @@ function PairingDumb({ leftData, leftColumns, rightData, rightColumns }: Pairing
   }
 
   const handlePair = () => {
-    selectedLeft && selectedRight && mutate({ udaeRowId: selectedLeft.id, csjId: selectedRight.id })
+    if (selectedLeft && selectedRight) mutate({ udaeRowId: selectedLeft.id, csjId: selectedRight.id })
   }
 
   return (
@@ -77,13 +77,13 @@ function PairingDumb({ leftData, leftColumns, rightData, rightColumns }: Pairing
       <div className="mb-4 flex flex-col space-y-4 lg:flex-row lg:space-x-4 lg:space-y-0">
         <div className="w-full lg:w-1/2">
           <h2 className="mb-2 text-xl font-bold">Datos UDAE</h2>
-          {renderFilterForm(leftColumns, addLeftFilter)}
+          <FilterForm columns={leftColumns} addFilter={addLeftFilter} />
           {renderActiveFilters(leftFilters, removeLeftFilter)}
           {renderTable(leftColumns, paginatedLeftData, selectedLeft, setSelectedLeft, leftPage, setLeftPage)}
         </div>
         <div className="w-full lg:w-1/2">
           <h2 className="mb-2 text-xl font-bold">Datos CSJ</h2>
-          {renderFilterForm(rightColumns, addRightFilter)}
+          <FilterForm columns={rightColumns} addFilter={addRightFilter} />
           {renderActiveFilters(rightFilters, removeRightFilter)}
           {renderTable(rightColumns, paginatedRightData, selectedRight, setSelectedRight, rightPage, setRightPage)}
         </div>

@@ -25,7 +25,7 @@ export default function Page() {
 
   useEffect(() => {
     if (loginWithCodeState.success) router.push('/')
-  }, [loginWithCodeState])
+  }, [loginWithCodeState, router])
 
   const onRequestLoginSubmit = (e: React.FormEvent) => {
     e.preventDefault()

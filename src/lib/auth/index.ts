@@ -1,10 +1,10 @@
 import { PrismaAdapter } from '@lucia-auth/adapter-prisma'
 import { hash, verify } from '@node-rs/argon2'
 import dayjs from 'dayjs'
-import { Cookie, Lucia } from 'lucia'
+import { type Cookie, Lucia } from 'lucia'
+import { cookies } from 'next/headers'
 import { db } from '~/server/db'
 import { sendEmail } from '../email'
-import { cookies } from 'next/headers'
 
 const adapter = new PrismaAdapter(db.session, db.user)
 
@@ -62,7 +62,7 @@ export const requestLoginCode = async (
   const sentEmailId = await sendEmail({ subject: 'Inicio de sesión', to, html })
   if (!sentEmailId) return { success: false, message: 'Error al enviar correo electrónico con el código de acceso.' }
 
-  let user = await db.user.findFirst({ where: { username } })
+  const user = await db.user.findFirst({ where: { username } })
   const passwordExpiresAt = dayjs().add(10, 'minutes').toDate()
 
   if (!user) await db.user.create({ data: { username, password: passwordHash, passwordExpiresAt } })
@@ -77,7 +77,7 @@ export const loginWithCode = async (
 ): Promise<{ success: true; sessionCookie: Cookie } | { success: false; message: string }> => {
   if (!code || !username) return { success: false, message: 'Código de verificación incorrecto.' }
 
-  let user = await db.user.findFirst({ where: { username: username.toString() } })
+  const user = await db.user.findFirst({ where: { username: username.toString() } })
   if (!user) return { success: false, message: 'Código de verificación incorrecto.' }
 
   if (dayjs().isAfter(user.passwordExpiresAt)) return { success: false, message: 'Código de verificación incorrecto.' }
@@ -106,7 +106,7 @@ export const validateSession = async () => {
 
   const { user, session } = await lucia.validateSession(sessionId)
 
-  if (session && session.fresh) {
+  if (session?.fresh) {
     authCookie = lucia.createSessionCookie(sessionId)
   } else if (!session) {
     authCookie = lucia.createBlankSessionCookie()

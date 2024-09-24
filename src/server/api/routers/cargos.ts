@@ -6,7 +6,7 @@ const getColumnPrettyName = (columnName: string) =>
   columnName
     .match(/(^[a-z]|[A-Z])[a-z0-9]+/g)
     ?.map((s) => s[0]?.toUpperCase() + s.slice(1))
-    .join(' ') || ''
+    .join(' ') ?? ''
 
 const getModelColumns = ({ fields }: (typeof Prisma.dmmf.datamodel.models)[0]) =>
   fields.map(({ name, type }) => ({ name, type, prettyName: getColumnPrettyName(name) }))

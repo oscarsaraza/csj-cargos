@@ -1,7 +1,7 @@
 import { Button } from '~/components/ui/button'
 import { ScrollArea, ScrollBar } from '~/components/ui/scroll-area'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
-import { ITEMS_PER_PAGE, TableColumn } from './types'
+import { ITEMS_PER_PAGE, type TableColumn } from './types'
 
 export const renderTable = (
   columns: TableColumn[],

@@ -8,7 +8,7 @@ const requestLoginSchema = z.object({
   username: z.string(),
 })
 
-export const requestLoginAction = async (prevState: any, formData: FormData) => {
+export const requestLoginAction = async (prevState: unknown, formData: FormData) => {
   const { success, data, error } = requestLoginSchema.safeParse(Object.fromEntries(formData))
   if (!success) throw new Error(error.message)
 
@@ -23,7 +23,7 @@ const loginWithCodeSchema = z.object({
   code: z.string(),
 })
 
-export const loginWithCodeAction = async (prevState: any, formData: FormData) => {
+export const loginWithCodeAction = async (prevState: unknown, formData: FormData) => {
   const { success, data, error } = loginWithCodeSchema.safeParse(Object.fromEntries(formData))
   if (!success) throw new Error(error.message)
 

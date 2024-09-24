@@ -6,7 +6,13 @@ import { Input } from '~/components/ui/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select'
 import { FilterItem, TableColumn } from './types'
 
-export const renderFilterForm = (columns: TableColumn[], addFilter: (filterItem: FilterItem) => void) => {
+export const FilterForm = ({
+  columns,
+  addFilter,
+}: {
+  columns: TableColumn[]
+  addFilter: (filterItem: FilterItem) => void
+}) => {
   const [selectedColumn, setSelectedColumn] = useState('')
   const [selectedValue, setSelectedValue] = useState('')
 
