@@ -16,12 +16,17 @@ export const cargosRouter = createTRPCRouter({
     const datosUdae = await ctx.db.datosUdae.findMany({
       where: { datosCsjId: { isSet: false } },
       orderBy: { numero: 'asc' },
+      take: 5,
     })
-    const modelUdae = Prisma.dmmf.datamodel.models.find(({ name }) => name === 'datosUdae')
+    const modelUdae = Prisma.dmmf.datamodel.models.find(({ name }) => name === 'DatosUdae')
     const columnsUdae = modelUdae ? getModelColumns(modelUdae) : []
 
-    const datosCsj = await ctx.db.datosCsj.findMany({ include: { datosUdae: true }, orderBy: { numero: 'asc' } })
-    const modelCsj = Prisma.dmmf.datamodel.models.find(({ name }) => name === 'datosCsj')
+    const datosCsj = await ctx.db.datosCsj.findMany({
+      include: { datosUdae: true },
+      orderBy: { numero: 'asc' },
+      take: 5,
+    })
+    const modelCsj = Prisma.dmmf.datamodel.models.find(({ name }) => name === 'DatosCsj')
     const columnsCsj = modelCsj ? getModelColumns(modelCsj) : []
 
     return { datosUdae, columnsUdae, datosCsj: datosCsj.filter((d) => d.datosUdae.length === 0), columnsCsj }

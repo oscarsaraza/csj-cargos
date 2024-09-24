@@ -7,7 +7,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model datosUdae {
+model User {
+  id                String    @id @default(auto()) @map("_id") @db.ObjectId
+  username          String    @unique
+  password          String
+  passwordExpiresAt DateTime
+  sessions          Session[]
+}
+
+model Session {
+  id        String   @id @default(cuid()) @map("_id")
+  expiresAt DateTime
+  userId    String   @db.ObjectId
+  user      User     @relation(references: [id], fields: [userId], onDelete: Cascade)
+  username  String
+}
+
+model DatosUdae {
   id                              String    @id @default(auto()) @map("_id") @db.ObjectId
   actoAdministrativoModificatorio String?
   anioActoAdministrativo          Int?
@@ -29,11 +45,11 @@ model datosUdae {
   observaciones                   String?
   subespecialidad                 String
   tipoActoAdministrativo          String?
-  datosCsjId                      String?    @unique @db.ObjectId
-  datosCsj                        datosCsj? @relation(fields: [datosCsjId], references: [id])
+  datosCsjId                      String?   @db.ObjectId
+  datosCsj                        DatosCsj? @relation(fields: [datosCsjId], references: [id])
 }
 
-model datosCsj {
+model DatosCsj {
   id             String      @id @default(auto()) @map("_id") @db.ObjectId
   cargo          String
   circuito       String
@@ -46,5 +62,5 @@ model datosCsj {
   nivel          String?
   numero         Int
   propiedad      String?
-  datosUdae      datosUdae[]
+  datosUdae      DatosUdae[]
 }
