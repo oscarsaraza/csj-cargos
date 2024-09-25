@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { api } from '~/trpc/react'
 import { renderActiveFilters } from './active-filters'
@@ -48,6 +48,11 @@ function PairingDumb({ leftData, leftColumns, rightData, rightColumns }: Pairing
       filters.every((filter) => String(item[filter.column]).toLowerCase().includes(filter.value.toLowerCase())),
     )
   }
+
+  useEffect(() => {
+    setLeftPage(1)
+    setRightPage(1)
+  }, [leftFilters, rightFilters])
 
   const filteredLeftData = filterData(leftData, leftFilters)
   const filteredRightData = filterData(rightData, rightFilters)
