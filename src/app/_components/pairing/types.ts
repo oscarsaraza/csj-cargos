@@ -5,4 +5,4 @@ export type DatosCsjRow = RouterOutputs['cargos']['getPairingDataCsj']['datosCsj
 export type TableColumn = { name: string; type: string; prettyName: string }
 export type FilterItem = { column: string; value: string }
 
-export const ITEMS_PER_PAGE = 10
+export const ITEMS_PER_PAGE = 15

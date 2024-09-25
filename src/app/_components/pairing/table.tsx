@@ -15,12 +15,14 @@ export const renderTable = (
 
   return (
     <div>
-      <ScrollArea className="h-96 rounded-md border">
+      <ScrollArea className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
               {filteredColumns.map(({ name, prettyName }) => (
-                <TableHead key={name}>{prettyName}</TableHead>
+                <TableHead className="text-nowrap" key={name}>
+                  {prettyName}
+                </TableHead>
               ))}
             </TableRow>
           </TableHeader>
@@ -28,11 +30,13 @@ export const renderTable = (
             {data.map((item) => (
               <TableRow
                 key={item.id}
-                className={selected === item ? 'bg-blue-100 dark:bg-blue-800' : ''}
+                className={selected === item ? 'bg-blue-100 hover:bg-blue-200 dark:bg-blue-800' : ''}
                 onClick={() => setSelected(item)}
               >
                 {filteredColumns.map(({ name }) => (
-                  <TableCell key={name}>{item[name] ? String(item[name]) : '-'}</TableCell>
+                  <TableCell className="text-nowrap" key={name}>
+                    {item[name] ? String(item[name]) : '-'}
+                  </TableCell>
                 ))}
               </TableRow>
             ))}
@@ -40,6 +44,7 @@ export const renderTable = (
         </Table>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
+
       <div className="mt-2 flex items-center justify-between">
         <Button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1}>
           {'<'}
