@@ -7,6 +7,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  csj
+  deaj
+  external
+}
+
 model User {
   id                String       @id @default(auto()) @map("_id") @db.ObjectId
   username          String       @unique
@@ -15,6 +21,7 @@ model User {
   sessions          Session[]
   enlacesCsj        EnlaceCsj[]
   enlacesDeaj       EnlaceDeaj[]
+  role              UserRole     @default(external)
 }
 
 model Session {
@@ -63,19 +70,26 @@ model EnlaceCsj {
 }
 
 model DatosCsj {
-  id             String     @id @default(auto()) @map("_id") @db.ObjectId
-  cargo          String
-  circuito       String
-  codigoDespacho String
-  despacho       String
-  documento      String?
-  estadoActual   String
-  genero         String?
-  municipio      String
-  nivel          String?
-  numero         Int
-  propiedad      String?
-  enlace         EnlaceCsj?
+  id                String     @id @default(auto()) @map("_id") @db.ObjectId
+  acuerdo           String?
+  cargo             String
+  cedula            String?
+  circuito          String
+  codigoDespacho    String
+  condicionEspecial String
+  depacho           String
+  escalafon         String?
+  estadoActual      String
+  estadoVacante     String
+  genero            String?
+  municipio         String
+  nivel             String?
+  numero            String
+  observaciones     String?
+  propiedad         String?
+  provisionalidad   String?
+  tramitePendiente  String?
+  enlace            EnlaceCsj?
 }
 
 model EnlaceDeaj {
@@ -92,6 +106,41 @@ model EnlaceDeaj {
 }
 
 model DatosDeaj {
-  id     String      @id @default(auto()) @map("_id") @db.ObjectId
-  enlace EnlaceDeaj?
+  id                              String      @id @default(auto()) @map("_id") @db.ObjectId
+  cargoProvisional                String?
+  cargoTitular                    String
+  ciudadUbicacionLaboral          String?
+  claseNombramiento               String?
+  codCargoProvisional             String?
+  codCargoTitular                 String
+  codDependenciaProvisional       String?
+  codDependenciaTitular           String
+  codigoUnidadEjecutora           String
+  dependenciaProvisional          String?
+  dependenciaTitular              String
+  fechaContinuidad                String?
+  fechaFin                        String?
+  fechaIngresoSeccional           String?
+  fechaInicial                    String?
+  fechaInicio                     String?
+  fechaRetiro                     String?
+  fechaRetiroSeccional            String?
+  idOcurrenciaTitular             String?
+  naturaleza                      String?
+  naturalezaOcurrenciaProvisional String?
+  nomDocumentoReemplazo           String?
+  nombreReemplazo                 String?
+  nombreRef                       String?
+  numDocumento                    String?
+  numDocumentoRef                 String?
+  numVinculacion                  String?
+  numVinculacionReemplazo         String?
+  ocurrenciaProvisional           String?
+  refNumVinculacion               String?
+  regimenSalarial                 String?
+  registro                        String?
+  servidor                        String
+  unidadEjecutora                 String
+  vinculacionNovedad              String?
+  enlace                          EnlaceDeaj?
 }

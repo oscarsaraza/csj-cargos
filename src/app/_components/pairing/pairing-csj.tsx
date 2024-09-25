@@ -15,7 +15,7 @@ type PairingPropTypes = {
   rightColumns: TableColumn[]
 }
 
-export default function Pairing() {
+export function PairingCsj() {
   const { data, error } = api.cargos.getPairingDataCsj.useQuery()
   if (!data || error) return null
 

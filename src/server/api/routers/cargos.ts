@@ -44,4 +44,37 @@ export const cargosRouter = createTRPCRouter({
 
       return result
     }),
+
+  getPairingDataDeaj: protectedProcedure.query(async ({ ctx }) => {
+    const datosUdae = await ctx.db.datosUdae.findMany({ where: { enlaceDeaj: null }, orderBy: { numero: 'asc' } })
+    const modelUdae = Prisma.dmmf.datamodel.models.find(({ name }) => name === 'DatosUdae')
+    const columnsUdae = modelUdae ? getModelColumns(modelUdae) : []
+
+    const datosDeaj = await ctx.db.datosDeaj.findMany({ where: { enlace: null } /* orderBy: { numero: 'asc' } */ })
+    const modelDeaj = Prisma.dmmf.datamodel.models.find(({ name }) => name === 'DatosDeaj')
+    const columnsDeaj = modelDeaj ? getModelColumns(modelDeaj) : []
+
+    return { datosUdae, columnsUdae, datosDeaj, columnsDeaj }
+  }),
+
+  savePairUdaeDeaj: protectedProcedure
+    .input(
+      z.object({
+        udaeRowId: z.string(),
+        deajId: z.string(),
+      }),
+    )
+    .mutation(async ({ ctx, input }) => {
+      const deaj = await ctx.db.datosDeaj.findUnique({ where: { id: input.deajId }, include: { enlace: true } })
+      if (deaj?.enlace) throw new Error('El registro de la DEAJ ya se encuentra asociado a un registro de la UDAE.')
+
+      const udae = await ctx.db.datosUdae.findUnique({ where: { id: input.udaeRowId }, include: { enlaceDeaj: true } })
+      if (udae?.enlaceDeaj) throw new Error('El registro de la UDAE ya se encuentra asociado a un registro del DEAJ.')
+
+      const result = await ctx.db.enlaceDeaj.create({
+        data: { datosUdaeId: input.udaeRowId, datosDeajId: input.deajId, userId: ctx.user.userId },
+      })
+
+      return result
+    }),
 })
