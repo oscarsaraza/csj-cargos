@@ -15,12 +15,8 @@ export default async function Home() {
 
   return (
     <HydrateClient>
-      <main className="flex flex-col items-center justify-center">
-        <div className="container flex flex-col items-center justify-center gap-12 px-4 py-16">
-          {user.role === 'csj' && <PairingCsj />}
-          {user.role === 'deaj' && <PairingDeaj />}
-        </div>
-      </main>
+      {user.role === 'csj' && <PairingCsj />}
+      {user.role === 'deaj' && <PairingDeaj />}
     </HydrateClient>
   )
 }

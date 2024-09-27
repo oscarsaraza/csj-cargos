@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect } from 'react'
 import { useFormState } from 'react-dom'
@@ -20,6 +21,11 @@ export function Header({ username }: { username: string }) {
 
   return (
     <header className="flex flex-row items-center justify-end gap-2 px-4 py-2">
+      <Link href="/">Emparejamiento</Link>
+      <Link href="/actos-administrativos">Actos administrativos</Link>
+
+      <div className="grow"></div>
+
       <span>{username}</span>
       <Button variant="link" onClick={onLogout}>
         Cerrar sesión
