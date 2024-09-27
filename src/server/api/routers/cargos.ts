@@ -80,4 +80,147 @@ export const cargosRouter = createTRPCRouter({
 
       return result
     }),
+
+  getConsolidado: protectedProcedure.query(async ({ ctx }) => {
+    const registros = await ctx.db.datosUdae.findMany({
+      where: { OR: [{ enlaceCsj: { isNot: null } }, { enlaceDeaj: { isNot: null } }] },
+      include: {
+        enlaceCsj: { include: { datosCsj: true } },
+        enlaceDeaj: { include: { datosDeaj: true } },
+        datosActoAdministrativo: { include: { actoAdministrativo: true } },
+      },
+      orderBy: [{ numero: 'asc' }],
+    })
+
+    const columns = [
+      { modelName: 'DatosUdae', name: 'numero', type: 'string', prettyName: 'Número' },
+      { modelName: 'DatosUdae', name: 'distritoJudicial', type: 'string', prettyName: 'Distrito' },
+      { modelName: 'DatosUdae', name: 'circuitoJudicial', type: 'string', prettyName: 'Circuito' },
+      { modelName: 'DatosUdae', name: 'municipioSedeFisica', type: 'string', prettyName: 'Municipio' },
+      { modelName: 'DatosUdae', name: 'dependencia', type: 'string', prettyName: 'Dependencia' },
+      { modelName: 'DatosUdae', name: 'especialidad', type: 'string', prettyName: 'Especialidad' },
+      { modelName: 'DatosUdae', name: 'subespecialidad', type: 'string', prettyName: 'Subespecialidad' },
+      { modelName: 'DatosUdae', name: 'nombreDespacho', type: 'string', prettyName: 'Despacho' },
+      { modelName: 'DatosUdae', name: 'descripcionCargo', type: 'string', prettyName: 'Descripción del cargo' },
+      { modelName: 'DatosUdae', name: 'gradoCargo', type: 'string', prettyName: 'Grado del cargo' },
+      {
+        modelName: 'DatosUdae',
+        name: 'tipoActoAdministrativo',
+        type: 'string',
+        prettyName: 'Tipo de Acto Administrativo',
+      },
+      {
+        modelName: 'DatosUdae',
+        name: 'numeroActoAdministrativo',
+        type: 'string',
+        prettyName: 'Número de Acto Administrativo',
+      },
+      {
+        modelName: 'DatosUdae',
+        name: 'anioActoAdministrativo',
+        type: 'string',
+        prettyName: 'Año de Acto Administrativo',
+      },
+      { modelName: 'DatosUdae', name: 'denominacionInicial', type: 'string', prettyName: 'Denominacion inicial' },
+      { modelName: 'DatosUdae', name: 'gradoInicial', type: 'string', prettyName: 'Grado inicial' },
+      {
+        modelName: 'DatosUdae',
+        name: 'actoAdministrativoModificatorio',
+        type: 'string',
+        prettyName: 'Acto Administrativo modificatorio',
+      },
+      { modelName: 'DatosUdae', name: 'observaciones', type: 'string', prettyName: 'Observaciones' },
+
+      // 'SECCIÓN (DIVISIÓN, O GRUPO)', // ???
+      { modelName: 'DatosCsj', name: 'codigoDespacho', type: 'string', prettyName: 'Código del despacho' },
+      // '¿El cargo existe en este despacho?', // Si, No, Si con novedad
+
+      {
+        modelName: 'DatosActo',
+        name: 'actoCorrecto',
+        type: 'string',
+        prettyName: '¿El acto administrativo es correcto?',
+      },
+      { modelName: 'DatosActo', name: 'articulo', type: 'string', prettyName: 'Artículo' },
+      { modelName: 'DatosActo', name: 'literal', type: 'string', prettyName: 'Literal' },
+      { modelName: 'DatosActo', name: 'numeral', type: 'string', prettyName: 'Numeral' },
+
+      // Sección en blanco a menos que "¿El acto administrativo es correcto?" sea igual a "No"
+      {
+        modelName: 'ActoAdministrativo',
+        name: 'tipo',
+        type: 'string',
+        prettyName: 'Tipo de acto administrativo correcto',
+      },
+      {
+        modelName: 'ActoAdministrativo',
+        name: 'numero',
+        type: 'string',
+        prettyName: 'Número del acto administrativo correcto',
+      },
+      {
+        modelName: 'ActoAdministrativo',
+        name: 'anio',
+        type: 'string',
+        prettyName: 'Año del acto administrativo correcto',
+      },
+      { modelName: 'ActoAdministrativo', name: 'articulo', type: 'string', prettyName: 'Artículo correcto' },
+      { modelName: 'ActoAdministrativo', name: 'literal', type: 'string', prettyName: 'Literal correcto' },
+      { modelName: 'ActoAdministrativo', name: 'numeral', type: 'string', prettyName: 'Numeral correcto' },
+
+      // 'OBSERVACIONES (Para nombre del despacho, cargo y grado) ',
+
+      // 'CLASIFICACIÓN DEL EMPLEO (Art. 130 Ley 270)', // En carrera, En periodo individual, En libre nombramiento
+      // 'FORMA DE PROVISIÓN DEL CARGO (Art. 132 Ley 270)', // En propiedad, En provisionalidad, En encargo, Cargo vacante
+      {
+        modelName: 'DatosCsj',
+        name: 'propiedad',
+        type: 'string',
+        prettyName: 'Nombres del servidor judicial en propiedad',
+      },
+      // 'APELLIDOS SERVIDOR JUDICIAL EN PROPIEDAD', // datosCsj.propiedad (separar nombres de apellidos)
+      { modelName: 'DatosCsj', name: 'tipoDocumento', type: 'string', prettyName: 'Tipo de documento de identidad' },
+      { modelName: 'DatosCsj', name: 'cedula', type: 'string', prettyName: 'Número de documento de identidad' },
+      // 'NIVEL DE ESCOLARIDAD', // Bachiller, Tecnólogo, Técnico, Profesional, Pos grado, Doctorado, Pos doctorado
+      // 'N° DE FAMILIARES DEPENDIENTES CON LOS QUE CONVIVE (1er grado de consanguinidad/afinidad)', //
+
+      // 'EL CARGO TIENE SERVIDOR EN PROVISIONALIDAD?', // Si, No
+      // 'La provisionalidad tiene fecha de terminación?', // Si cuando hay una fecha en que finaliza la provisionalidad, No en caso contrario
+      {
+        modelName: 'DatosDeaj',
+        name: 'fechaFin',
+        type: 'string',
+        prettyName: 'Fecha en que finaliza la provisionalidad (DD/MM/AAAA)',
+      },
+      // 'NOMBRES DEL SERVIDOR JUDICIAL EN PROVISIONALIDAD',
+      // 'APELLIDOS SERVIDOR JUDICIAL EN PROVISIONALIDAD',
+      // 'TIPO DE DOCUMENTO DE IDENTIDAD - PROV',
+      // 'NÚMERO DE DOCUMENTO DE IDENTIDAD - PROV',
+      // 'NIVEL DE ESCOLARIDAD - PROV',
+      // 'N° DE FAMILIARES DEPENDIENTES CON LOS QUE CONVIVE (1er grado de consanguinidad/afinidad) - PROV',
+
+      // 'PERFIL DEL CARGO',
+      // 'PROFESIÓN 1 (La que aplica para el cargo)',
+      // 'PROFESIÓN 2 (Profesion adicional)',
+      // 'PROFESIÓN 3 (Profesion adicional)',
+      // 'OBSERVACIONES (para clasificación, provisión del cargo, profesión)',
+
+      // 'TIPO DE NOVEDAD (Movimiento del Cargo)',
+      // 'TIPO DE TRASLADO',
+      // 'JURISDICCIÓN DESTINO (Traslado)',
+      // 'DISTRITO DESTINO (Traslado)',
+      // 'CIRCUITO DESTINO (Traslado)',
+      // 'MUNICIPIO DESTINO (Traslado)',
+      // 'DESPACHO DESTINO (Traslado)',
+      // 'CÓDIGO DEL DESPACHO DESTINO (Traslado)',
+      // 'TIPO DE ACTO ADMINISTRATIVO (Traslado o supresión)',
+      // 'NÚMERO DE ACTO ADMINISTRATIVO (Traslado o supresión)',
+      // 'AÑO DEL ACTO ADMINISTRATIVO (Traslado o supresión)',
+      // 'OBSERVACIONES DE LA NOVEDAD (Traslado o supresión)',
+
+      { modelName: 'DatosDeaj', name: 'idOcurrenciaTitular', type: 'string', prettyName: 'ID ocurrencia titular' },
+    ]
+
+    return { registros, columns }
+  }),
 })

@@ -12,7 +12,7 @@ export const getColumnPrettyName = (columnName: string) =>
     .join(' ') ?? ''
 
 export const orderTableColumns = (
-  columns: { name: string; type: string; prettyName: string }[] = [],
+  columns: { name: string; type: string; prettyName: string; modelName: string }[] = [],
   order: string[] = [],
 ) => {
   const sortedColumns = order

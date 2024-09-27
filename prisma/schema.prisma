@@ -75,6 +75,8 @@ model DatosCsj {
   id                String     @id @default(auto()) @map("_id") @db.ObjectId
   acuerdo           String?
   cargo             String
+  // Cédula de ciudadanía, Cédula de extranjería, Número Único de Identificación Personal (NUIP)
+  tipoDocumento     String?
   cedula            String?
   circuito          String
   codigoDespacho    String
@@ -173,6 +175,8 @@ model EnlaceActoAdministrativo {
   datosUdae            DatosUdae          @relation(fields: [datosUdaeId], references: [id])
   actoAdministrativoId String             @db.ObjectId
   actoAdministrativo   ActoAdministrativo @relation(fields: [actoAdministrativoId], references: [id])
+  // Si cuando el tipo de acto, número y año coinciden con los datos de la UDAE, No en caso contrario
+  actoCorrecto         String
   articulo             String
   literal              String?
   numeral              String?
