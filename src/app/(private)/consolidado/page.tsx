@@ -2,6 +2,7 @@ import { ScrollArea, ScrollBar } from '~/components/ui/scroll-area'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 import { cn } from '~/lib/utils'
 import { api } from '~/trpc/server'
+import { EnlaceActoForm } from './enlace-acto-form'
 
 const bgBymodelName = {
   DatosUdae: 'bg-sky-50',
@@ -13,6 +14,7 @@ const bgBymodelName = {
 
 export default async function Consolidado() {
   const { columns, registros } = await api.cargos.getConsolidado()
+  const { actos } = await api.actos.getList()
 
   return (
     <div className="w-full max-w-full space-y-4">
@@ -22,6 +24,7 @@ export default async function Consolidado() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Datos de acto administrativo</TableHead>
               {columns.map(({ name, prettyName }) => (
                 <TableHead key={name}>{prettyName}</TableHead>
               ))}
@@ -30,6 +33,9 @@ export default async function Consolidado() {
           <TableBody>
             {registros.map((item) => (
               <TableRow key={item.id}>
+                <TableCell className="w-48">
+                  <EnlaceActoForm datosUdaeId={item.id} actosAdministrativosList={actos} />
+                </TableCell>
                 {columns.map(({ modelName, name }) => {
                   let fila = {}
 
