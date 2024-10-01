@@ -1,3 +1,5 @@
+import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
+import { Progress } from '~/components/ui/progress'
 import { ScrollArea, ScrollBar } from '~/components/ui/scroll-area'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 import { cn } from '~/lib/utils'
@@ -12,7 +14,7 @@ const bgBymodelName = {
 }
 
 export default async function Consolidado() {
-  const { columns, registros } = await api.cargos.getConsolidado()
+  const { columns, registros, datosAvance } = await api.cargos.getConsolidado()
 
   return (
     <div className="w-full max-w-full space-y-4">
@@ -52,6 +54,52 @@ export default async function Consolidado() {
         </Table>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
+
+      <div className="flex flex-row flex-wrap gap-4">
+        <ProgressCard
+          title="Emparejamiento CSJ"
+          description={`${datosAvance.avanceCsj}/${datosAvance.totalUdae}`}
+          progress={datosAvance.porcCsj}
+        />
+        <ProgressCard
+          title="Emparejamiento DEAJ"
+          description={`${datosAvance.avanceDeaj}/${datosAvance.totalDeaj}`}
+          progress={datosAvance.porcDeaj}
+        />
+        <ProgressCard
+          title="Revisión de actos administrativos"
+          description={`${datosAvance.totalActos}/${datosAvance.totalUdae}`}
+          progress={datosAvance.porcActos}
+        />
+        <ProgressCard
+          title="Recolección de información personal"
+          description={`${datosAvance.totalInfoTrabajadores}/${datosAvance.totalUdae}`}
+          progress={datosAvance.porcInfoTrabajadores}
+        />
+      </div>
     </div>
+  )
+}
+
+interface ItemProgressCardProps {
+  title: string
+  description: string
+  progress: number
+}
+
+function ProgressCard({ title, description, progress }: ItemProgressCardProps) {
+  return (
+    <Card className="w-[360px]">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-lg font-semibold">{title}</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-2">
+          <Progress value={progress} className="h-2" />
+          <p className="text-sm text-muted-foreground">{description}</p>
+          <p className="text-xl font-bold">{progress.toFixed(2)}%</p>
+        </div>
+      </CardContent>
+    </Card>
   )
 }

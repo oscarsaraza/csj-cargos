@@ -231,6 +231,25 @@ export const cargosRouter = createTRPCRouter({
       { modelName: 'DatosDeaj', name: 'idOcurrenciaTitular', type: 'string', prettyName: 'ID ocurrencia titular' },
     ]
 
-    return { registros, columns }
+    const totalUdae = await ctx.db.datosUdae.count()
+    const avanceCsj = await ctx.db.enlaceCsj.count()
+    const avanceDeaj = await ctx.db.enlaceDeaj.count()
+    const totalDeaj = await ctx.db.datosDeaj.count({ where: { claseNombramiento: 'Provisionalidad' } })
+    const totalActos = await ctx.db.enlaceActoAdministrativo.count()
+
+    const datosAvance = {
+      totalUdae,
+      avanceCsj,
+      porcCsj: (avanceCsj / totalUdae) * 100,
+      avanceDeaj,
+      totalDeaj,
+      porcDeaj: (avanceDeaj / totalDeaj) * 100,
+      totalActos,
+      porcActos: (totalActos / totalUdae) * 100,
+      totalInfoTrabajadores: 0,
+      porcInfoTrabajadores: 0,
+    }
+
+    return { registros, columns, datosAvance }
   }),
 })
