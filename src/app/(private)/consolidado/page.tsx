@@ -11,6 +11,7 @@ const bgBymodelName = {
   DatosDeaj: 'bg-amber-50',
   ActoAdministrativo: 'bg-pink-50',
   DatosActo: 'bg-pink-50',
+  DatosEncuesta: 'bg-lime-50',
 }
 
 export default async function Consolidado() {
@@ -22,7 +23,7 @@ export default async function Consolidado() {
 
       <ScrollArea className="h-[920px] rounded-md border">
         <Table>
-          <TableHeader>
+          <TableHeader className="sticky top-0">
             <TableRow>
               {columns.map(({ name, prettyName }) => (
                 <TableHead key={name}>{prettyName}</TableHead>
@@ -35,12 +36,13 @@ export default async function Consolidado() {
                 {columns.map(({ modelName, name }) => {
                   let fila = {}
 
-                  if (modelName === 'DatosCsj') fila = item.enlaceCsj?.datosCsj || {}
+                  if (modelName === 'DatosUdae') fila = item
+                  else if (modelName === 'DatosCsj') fila = item.enlaceCsj?.datosCsj || {}
                   else if (modelName === 'DatosDeaj') fila = item.enlaceDeaj?.datosDeaj || {}
                   else if (modelName === 'ActoAdministrativo')
                     fila = item.datosActoAdministrativo?.actoAdministrativo || {}
                   else if (modelName === 'DatosActo') fila = item.datosActoAdministrativo || {}
-                  else fila = item
+                  else if (modelName === 'DatosEncuesta') fila = item.datosEncuesta || {}
 
                   return (
                     <TableCell className={cn('bg- max-w-lg truncate text-nowrap', bgBymodelName[modelName])} key={name}>

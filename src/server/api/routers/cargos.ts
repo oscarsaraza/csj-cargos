@@ -98,19 +98,23 @@ export const cargosRouter = createTRPCRouter({
         enlaceCsj: { include: { datosCsj: true } },
         enlaceDeaj: { include: { datosDeaj: true } },
         datosActoAdministrativo: { include: { actoAdministrativo: true } },
+        datosEncuesta: true
       },
       orderBy: [{ numero: 'asc' }],
     })
 
     const columns = [
       { modelName: 'DatosUdae', name: 'numero', type: 'string', prettyName: 'Número' },
-      { modelName: 'DatosUdae', name: 'distritoJudicial', type: 'string', prettyName: 'Distrito' },
-      { modelName: 'DatosUdae', name: 'circuitoJudicial', type: 'string', prettyName: 'Circuito' },
+      { modelName: 'DatosUdae', name: 'jurisdiccion', type: 'string', prettyName: 'Jurisdicción' },
+      { modelName: 'DatosUdae', name: 'consejoSeccional', type: 'string', prettyName: 'Consejo Seccional' },
+      { modelName: 'DatosUdae', name: 'direccionSeccional', type: 'string', prettyName: 'Dirección Seccional' },
+      { modelName: 'DatosUdae', name: 'distritoJudicial', type: 'string', prettyName: 'Distrito judicial' },
+      { modelName: 'DatosUdae', name: 'circuitoJudicial', type: 'string', prettyName: 'Circuito judicial' },
       { modelName: 'DatosUdae', name: 'municipioSedeFisica', type: 'string', prettyName: 'Municipio' },
       { modelName: 'DatosUdae', name: 'dependencia', type: 'string', prettyName: 'Dependencia' },
       { modelName: 'DatosUdae', name: 'especialidad', type: 'string', prettyName: 'Especialidad' },
-      { modelName: 'DatosUdae', name: 'subespecialidad', type: 'string', prettyName: 'Subespecialidad' },
-      { modelName: 'DatosUdae', name: 'nombreDespacho', type: 'string', prettyName: 'Despacho' },
+      { modelName: 'DatosUdae', name: 'subespecialidad', type: 'string', prettyName: 'Sub-especialidad' },
+      { modelName: 'DatosUdae', name: 'nombreDespacho', type: 'string', prettyName: 'Nombre de Despacho' },
       { modelName: 'DatosUdae', name: 'descripcionCargo', type: 'string', prettyName: 'Descripción del cargo' },
       { modelName: 'DatosUdae', name: 'gradoCargo', type: 'string', prettyName: 'Grado del cargo' },
       {
@@ -155,7 +159,7 @@ export const cargosRouter = createTRPCRouter({
       { modelName: 'DatosActo', name: 'literal', type: 'string', prettyName: 'Literal' },
       { modelName: 'DatosActo', name: 'numeral', type: 'string', prettyName: 'Numeral' },
 
-      // Sección en blanco a menos que "¿El acto administrativo es correcto?" sea igual a "No"
+      /////////////// Sección en blanco a menos que "¿El acto administrativo es correcto?" sea igual a "No"
       {
         modelName: 'ActoAdministrativo',
         name: 'tipo',
@@ -174,46 +178,129 @@ export const cargosRouter = createTRPCRouter({
         type: 'string',
         prettyName: 'Año del acto administrativo correcto',
       },
-      { modelName: 'ActoAdministrativo', name: 'articulo', type: 'string', prettyName: 'Artículo correcto' },
-      { modelName: 'ActoAdministrativo', name: 'literal', type: 'string', prettyName: 'Literal correcto' },
-      { modelName: 'ActoAdministrativo', name: 'numeral', type: 'string', prettyName: 'Numeral correcto' },
+      { modelName: 'DatosActo', name: 'articulo', type: 'string', prettyName: 'Artículo correcto' },
+      { modelName: 'DatosActo', name: 'literal', type: 'string', prettyName: 'Literal correcto' },
+      { modelName: 'DatosActo', name: 'numeral', type: 'string', prettyName: 'Numeral correcto' },
 
       // 'OBSERVACIONES (Para nombre del despacho, cargo y grado) ',
 
-      // 'CLASIFICACIÓN DEL EMPLEO (Art. 130 Ley 270)', // En carrera, En periodo individual, En libre nombramiento
-      // 'FORMA DE PROVISIÓN DEL CARGO (Art. 132 Ley 270)', // En propiedad, En provisionalidad, En encargo, Cargo vacante
+      {
+        modelName: 'DatosDeaj',
+        name: 'claseNombramiento',
+        type: 'string',
+        prettyName: 'Clasificación del empleo (Art. 130 Ley 270)',
+        // En carrera, En periodo individual, En libre nombramiento
+      },
+      {
+        modelName: 'DatosDeaj',
+        name: '', // ----- DatosCsj.estadoActual: PROPIEDAD, VACANTE ?????
+        type: 'string',
+        prettyName: 'Forma de provisión del cargo (Art. 132 Ley 270)',
+        // En propiedad, En provisionalidad, En encargo, Cargo vacante
+      },
       {
         modelName: 'DatosCsj',
         name: 'propiedad',
         type: 'string',
         prettyName: 'Nombres del servidor judicial en propiedad',
       },
-      // 'APELLIDOS SERVIDOR JUDICIAL EN PROPIEDAD', // datosCsj.propiedad (separar nombres de apellidos)
-      { modelName: 'DatosCsj', name: 'tipoDocumento', type: 'string', prettyName: 'Tipo de documento de identidad' },
-      { modelName: 'DatosCsj', name: 'cedula', type: 'string', prettyName: 'Número de documento de identidad' },
-      // 'NIVEL DE ESCOLARIDAD', // Bachiller, Tecnólogo, Técnico, Profesional, Pos grado, Doctorado, Pos doctorado
-      // 'N° DE FAMILIARES DEPENDIENTES CON LOS QUE CONVIVE (1er grado de consanguinidad/afinidad)', //
+      {
+        modelName: 'DatosCsj',
+        name: 'propiedadApellidos',
+        type: 'string',
+        prettyName: 'Apellidos del servidor judicial en propiedad',
+      },
+      {
+        modelName: 'DatosEncuesta',
+        name: 'tipoDocumento',
+        type: 'string',
+        prettyName: 'Tipo de documento de identidad',
+      },
+      { modelName: 'DatosEncuesta', name: 'cedula', type: 'string', prettyName: 'Número de documento de identidad' },
+      { modelName: 'DatosEncuesta', name: 'nivelEscolaridad', type: 'string', prettyName: 'Nivel de escolaridad' },
+      {
+        modelName: 'DatosEncuesta',
+        name: 'familiaresDependientes',
+        type: 'string',
+        prettyName: 'Familiares dependientes con los que convive (1er grado de consanguinidad/afinidad)',
+      },
 
-      // 'EL CARGO TIENE SERVIDOR EN PROVISIONALIDAD?', // Si, No
-      // 'La provisionalidad tiene fecha de terminación?', // Si cuando hay una fecha en que finaliza la provisionalidad, No en caso contrario
+      {
+        modelName: 'DatosDeaj',
+        name: '',
+        type: 'string',
+        prettyName: 'El cargo tiene servidor en provisionalidad?', // Si, No
+      },
+      {
+        modelName: 'DatosDeaj',
+        name: '',
+        type: 'string',
+        prettyName: 'La provisionalidad tiene fecha de terminación',
+        // 'La provisionalidad tiene fecha de terminación?', // Si cuando hay una fecha en que finaliza la provisionalidad, No en caso contrario
+      },
       {
         modelName: 'DatosDeaj',
         name: 'fechaFin',
         type: 'string',
         prettyName: 'Fecha en que finaliza la provisionalidad (DD/MM/AAAA)',
       },
-      // 'NOMBRES DEL SERVIDOR JUDICIAL EN PROVISIONALIDAD',
-      // 'APELLIDOS SERVIDOR JUDICIAL EN PROVISIONALIDAD',
-      // 'TIPO DE DOCUMENTO DE IDENTIDAD - PROV',
-      // 'NÚMERO DE DOCUMENTO DE IDENTIDAD - PROV',
-      // 'NIVEL DE ESCOLARIDAD - PROV',
-      // 'N° DE FAMILIARES DEPENDIENTES CON LOS QUE CONVIVE (1er grado de consanguinidad/afinidad) - PROV',
+      {
+        modelName: 'DatosDeaj',
+        name: 'nombreReemplazo',
+        type: 'string',
+        prettyName: 'Nombres del servidor judicial en provisionalidad',
+      },
+      {
+        modelName: 'DatosDeaj',
+        name: 'apellidosReemplazo',
+        type: 'string',
+        prettyName: 'Apellidos del servidor judicial en provisionalidad',
+      },
+      {
+        modelName: 'DatosEncuesta',
+        name: 'tipoDocumentoProv',
+        type: 'string',
+        prettyName: 'Tipo de documento de identidad',
+      },
+      {
+        modelName: 'DatosEncuesta',
+        name: 'cedulaProv',
+        type: 'string',
+        prettyName: 'Número de documento de identidad',
+      },
+      { modelName: 'DatosEncuesta', name: 'nivelEscolaridadProv', type: 'string', prettyName: 'Nivel de escolaridad' },
+      {
+        modelName: 'DatosEncuesta',
+        name: 'familiaresDependientesProv',
+        type: 'string',
+        prettyName: 'Familiares dependientes con los que convive (1er grado de consanguinidad/afinidad)',
+      },
 
-      // 'PERFIL DEL CARGO',
-      // 'PROFESIÓN 1 (La que aplica para el cargo)',
-      // 'PROFESIÓN 2 (Profesion adicional)',
-      // 'PROFESIÓN 3 (Profesion adicional)',
-      // 'OBSERVACIONES (para clasificación, provisión del cargo, profesión)',
+      { modelName: 'DatosActo', name: 'perfilCargo', type: 'string', prettyName: 'Perfil del cargo' },
+      {
+        modelName: 'DatosEncuesta',
+        name: 'profesion1',
+        type: 'string',
+        prettyName: 'Profesión 1 (La que aplica para el cargo)',
+      },
+      {
+        modelName: 'DatosEncuesta',
+        name: 'profesion2',
+        type: 'string',
+        prettyName: 'Profesión 2 (Profesión adicional)',
+      },
+      {
+        modelName: 'DatosEncuesta',
+        name: 'profesion3',
+        type: 'string',
+        prettyName: 'Profesión 3 (Profesión adicional)',
+      },
+      {
+        modelName: 'DatosEncuesta',
+        name: 'observaciones',
+        type: 'string',
+        prettyName: 'Observaciones',
+      },
 
       // 'TIPO DE NOVEDAD (Movimiento del Cargo)',
       // 'TIPO DE TRASLADO',

@@ -48,6 +48,7 @@ model DatosUdae {
   especialidad                    String
   gradoCargo                      String
   gradoInicial                    String?
+  jurisdiccion                    String
   municipioSedeFisica             String
   nombreDespacho                  String
   numero                          Int
@@ -58,6 +59,7 @@ model DatosUdae {
   enlaceCsj                       EnlaceCsj?
   enlaceDeaj                      EnlaceDeaj?
   datosActoAdministrativo         EnlaceActoAdministrativo?
+  datosEncuesta                   DatosEncuesta?
 }
 
 model EnlaceCsj {
@@ -75,8 +77,6 @@ model DatosCsj {
   id                String     @id @default(auto()) @map("_id") @db.ObjectId
   acuerdo           String?
   cargo             String
-  // Cédula de ciudadanía, Cédula de extranjería, Número Único de Identificación Personal (NUIP)
-  tipoDocumento     String?
   cedula            String?
   circuito          String
   codigoDespacho    String
@@ -180,4 +180,26 @@ model EnlaceActoAdministrativo {
   articulo             String
   literal              String?
   numeral              String?
+  // Todas las profesiones que solicita el perfil del cargo del acto administrativo.
+  perfilCargo          String
+}
+
+model DatosEncuesta {
+  id                         String    @id @default(auto()) @map("_id") @db.ObjectId
+  // Cédula de ciudadanía, Cédula de extranjería, Número Único de Identificación Personal (NUIP)
+  tipoDocumento              String
+  documento                  String
+  // Bachiller, Tecnólogo, Técnico, Profesional, Pos grado, Doctorado, Pos doctorado
+  nivelEscolaridad           String
+  // Número de familiares dependientes con los que convive (1er grado de consanguinidad/afinidad)
+  familiaresDependientes     Int
+  profesion2                 String
+  profesion3                 String
+  observaciones              String    @default("")
+  tipoDocumentoProv          String?
+  cedulaProv                 String?
+  nivelEscolaridadProv       String?
+  familiaresDependientesProv Int?
+  datosUdaeId                String    @unique @db.ObjectId
+  datosUdae                  DatosUdae @relation(fields: [datosUdaeId], references: [id])
 }

@@ -10,6 +10,7 @@ export const enlaceActosRouter = createTRPCRouter({
         articulo: z.string(),
         literal: z.string().nullable(),
         numeral: z.string().nullable(),
+        perfilCargo: z.string().nullable(),
       }),
     )
     .mutation(async ({ ctx, input }) => {
@@ -28,6 +29,7 @@ export const enlaceActosRouter = createTRPCRouter({
         articulo: input.articulo,
         literal: input.literal,
         numeral: input.numeral,
+        perfilCargo: input.perfilCargo,
         actoAdministrativoId: input.actoAdministrativoId,
         userId: ctx.user.userId,
         actoCorrecto,

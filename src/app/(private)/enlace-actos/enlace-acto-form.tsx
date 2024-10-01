@@ -16,6 +16,7 @@ import {
 import { Input } from '~/components/ui/input'
 import { Label } from '~/components/ui/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '~/components/ui/select'
+import { Textarea } from '~/components/ui/textarea'
 import { api } from '~/trpc/react'
 
 type ActoFormProps = {
@@ -50,6 +51,7 @@ export function EnlaceActoForm({ datosUdaeId, actosAdministrativosList }: ActoFo
       articulo: data.get('articulo') as string,
       literal: data.get('literal') as string,
       numeral: data.get('numeral') as string,
+      perfilCargo: data.get('perfilCargo') as string,
     })
   }
 
@@ -128,6 +130,21 @@ export function EnlaceActoForm({ datosUdaeId, actosAdministrativosList }: ActoFo
                 name="numeral"
                 defaultValue={datosEnlace?.datosActoAdministrativo?.numeral || undefined}
                 className="col-span-3"
+              />
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="perfilCargo" className="text-right">
+                Perfil del cargo
+              </Label>
+              <Textarea
+                id="perfilCargo"
+                name="perfilCargo"
+                defaultValue={datosEnlace?.datosActoAdministrativo?.perfilCargo || ''}
+                className="col-span-3"
+                required
+                placeholder="Incluir todas las profesiones que solicita el perfil del cargo del acto administrativo."
+                rows={5}
               />
             </div>
           </div>
