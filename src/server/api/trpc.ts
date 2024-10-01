@@ -127,6 +127,9 @@ const authMiddleware = t.middleware(async ({ next, ctx }) => {
   })
   if (!session) return next({ ctx })
 
+  const user = await db.user.findUnique({ where: { id: session.userId } })
+  if (!user || !['csj', 'deaj'].includes(user.role)) return next({ ctx })
+
   return next({
     ctx: {
       user: { userId: session.userId, username: session.username },
