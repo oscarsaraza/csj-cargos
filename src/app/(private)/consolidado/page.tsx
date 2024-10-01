@@ -2,7 +2,6 @@ import { ScrollArea, ScrollBar } from '~/components/ui/scroll-area'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 import { cn } from '~/lib/utils'
 import { api } from '~/trpc/server'
-import { EnlaceActoForm } from './enlace-acto-form'
 
 const bgBymodelName = {
   DatosUdae: 'bg-sky-50',
@@ -14,17 +13,15 @@ const bgBymodelName = {
 
 export default async function Consolidado() {
   const { columns, registros } = await api.cargos.getConsolidado()
-  const { actos } = await api.actos.getList()
 
   return (
     <div className="w-full max-w-full space-y-4">
       <h1>Consolidado ({registros.length} registros)</h1>
 
-      <ScrollArea className="rounded-md border">
+      <ScrollArea className="h-[920px] rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Datos de acto administrativo</TableHead>
               {columns.map(({ name, prettyName }) => (
                 <TableHead key={name}>{prettyName}</TableHead>
               ))}
@@ -33,9 +30,6 @@ export default async function Consolidado() {
           <TableBody>
             {registros.map((item) => (
               <TableRow key={item.id}>
-                <TableCell className="w-48">
-                  <EnlaceActoForm datosUdaeId={item.id} actosAdministrativosList={actos} />
-                </TableCell>
                 {columns.map(({ modelName, name }) => {
                   let fila = {}
 
@@ -58,16 +52,6 @@ export default async function Consolidado() {
         </Table>
         <ScrollBar orientation="horizontal" />
       </ScrollArea>
-
-      {/* <div className="mt-2 flex items-center justify-between">
-        <Button onClick={() => setPage(Math.max(1, page - 1))} disabled={page === 1}>
-          {'<'}
-        </Button>
-        <span>Página {page}</span>
-        <Button onClick={() => setPage(page + 1)} disabled={data.length < ITEMS_PER_PAGE}>
-          {'>'}
-        </Button>
-      </div> */}
     </div>
   )
 }

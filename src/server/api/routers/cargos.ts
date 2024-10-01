@@ -81,6 +81,16 @@ export const cargosRouter = createTRPCRouter({
       return result
     }),
 
+  getPairingDataActos: protectedProcedure.query(async ({ ctx }) => {
+    const datosUdae = await ctx.db.datosUdae.findMany({
+      where: { datosActoAdministrativo: null },
+      orderBy: [{ municipioSedeFisica: 'asc' }, { nombreDespacho: 'asc' }, { descripcionCargo: 'asc' }],
+    })
+    const columnsUdae = modelUdae ? orderTableColumns(getModelColumns(modelUdae), udaeColumnsOrder) : []
+
+    return { datosUdae, columnsUdae }
+  }),
+
   getConsolidado: protectedProcedure.query(async ({ ctx }) => {
     const registros = await ctx.db.datosUdae.findMany({
       where: { OR: [{ enlaceCsj: { isNot: null } }, { enlaceDeaj: { isNot: null } }] },

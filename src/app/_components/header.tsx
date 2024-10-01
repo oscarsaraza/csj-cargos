@@ -26,7 +26,7 @@ export function Header({ username }: { username: string }) {
   }, [formState])
 
   return (
-    <header className="flex flex-row items-center justify-end gap-2 px-4 py-2">
+    <header className="flex flex-row items-center justify-end gap-8 bg-slate-100 px-4 py-2 shadow-xl">
       <Link href="/" className={cn('text-xl text-slate-900', { 'font-bold underline': isLinkActive('/') })}>
         Emparejamiento
       </Link>
@@ -37,6 +37,12 @@ export function Header({ username }: { username: string }) {
         Actos administrativos
       </Link>
       <Link
+        href="/enlace-actos"
+        className={cn('text-xl text-slate-900', { 'font-bold underline': isLinkActive('/enlace-actos') })}
+      >
+        Revisión actos/cargos
+      </Link>
+      <Link
         href="/consolidado"
         className={cn('text-xl text-slate-900', { 'font-bold underline': isLinkActive('/consolidado') })}
       >
@@ -45,10 +51,12 @@ export function Header({ username }: { username: string }) {
 
       <div className="grow"></div>
 
-      <span>{username}</span>
-      <Button variant="link" onClick={onLogout}>
-        Cerrar sesión
-      </Button>
+      <div className="flex flex-row items-center gap-2">
+        <span className="font-bold text-sky-800">{username}</span>
+        <Button variant="link" onClick={onLogout}>
+          Cerrar sesión
+        </Button>
+      </div>
     </header>
   )
 }
