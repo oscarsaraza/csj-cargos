@@ -2,11 +2,15 @@ import { ScrollArea, ScrollBar } from '~/components/ui/scroll-area'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 import { api } from '~/trpc/server'
 import { ActoForm } from './acto-form'
+import Link from 'next/link'
+import { FileTextIcon } from 'lucide-react'
 
 export default async function Consolidado() {
   const { actos, columns } = await api.actos.getList()
 
-  const filteredColumns = columns.filter((column) => column.name !== 'id' && column.name !== 'enlacesUdae')
+  const filteredColumns = columns.filter(
+    (column) => column.name !== 'id' && column.name !== 'enlacesUdae' && column.name !== 'datosValidacionCargo',
+  )
 
   return (
     <div className="w-full max-w-lg space-y-4">
@@ -31,7 +35,16 @@ export default async function Consolidado() {
               <TableRow key={acto.id}>
                 {filteredColumns.map(({ name }) => (
                   <TableCell className="text-nowrap" key={name}>
-                    {acto[name] ? String(acto[name]) : '-'}
+                    {(name === 'id' || name === 'tipo' || name === 'anio' || name === 'numero') && acto[name]
+                      ? String(acto[name])
+                      : ''}
+                    {name === 'enlace' && acto[name] ? (
+                      <Link href={String(acto[name])} target="_blank" rel="noopener noreferrer">
+                        <FileTextIcon className="h-4 w-4" />
+                      </Link>
+                    ) : (
+                      ''
+                    )}
                   </TableCell>
                 ))}
                 <TableCell className="text-nowrap">

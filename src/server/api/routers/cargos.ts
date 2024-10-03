@@ -86,7 +86,15 @@ export const cargosRouter = createTRPCRouter({
       where: { datosActoAdministrativo: null },
       orderBy: [{ municipioSedeFisica: 'asc' }, { nombreDespacho: 'asc' }, { descripcionCargo: 'asc' }],
     })
-    const columnsUdae = modelUdae ? orderTableColumns(getModelColumns(modelUdae), udaeColumnsOrder) : []
+    const columnOrders = [
+      'municipioSedeFisica',
+      'descripcionCargo',
+      'nombreDespacho',
+      'tipoActoAdministrativo',
+      'anioActoAdministrativo',
+      'numeroActoAdministrativo',
+    ]
+    const columnsUdae = modelUdae ? orderTableColumns(getModelColumns(modelUdae), columnOrders) : []
 
     return { datosUdae, columnsUdae }
   }),
@@ -98,7 +106,8 @@ export const cargosRouter = createTRPCRouter({
         enlaceCsj: { include: { datosCsj: true } },
         enlaceDeaj: { include: { datosDeaj: true } },
         datosActoAdministrativo: { include: { actoAdministrativo: true } },
-        datosEncuesta: true
+        datosEncuesta: true,
+        datosValidacion: { include: { actoAdministrativo: true } },
       },
       orderBy: [{ numero: 'asc' }],
     })
@@ -144,10 +153,15 @@ export const cargosRouter = createTRPCRouter({
         prettyName: 'Acto Administrativo modificatorio',
       },
       { modelName: 'DatosUdae', name: 'observaciones', type: 'string', prettyName: 'Observaciones' },
-
-      // 'SECCIÓN (DIVISIÓN, O GRUPO)', // ???
+      // **************************** ORIGEN PENDIENTE!!!
+      { modelName: 'DatosCsj', name: '', type: 'string', prettyName: 'Sección (División o grupo)' },
       { modelName: 'DatosCsj', name: 'codigoDespacho', type: 'string', prettyName: 'Código del despacho' },
-      // '¿El cargo existe en este despacho?', // Si, No, Si con novedad
+      {
+        modelName: 'DatosValidacion',
+        name: 'cargoExiste',
+        type: 'string',
+        prettyName: '¿El cargo existe en este despacho?',
+      },
 
       {
         modelName: 'DatosActo',
@@ -159,7 +173,6 @@ export const cargosRouter = createTRPCRouter({
       { modelName: 'DatosActo', name: 'literal', type: 'string', prettyName: 'Literal' },
       { modelName: 'DatosActo', name: 'numeral', type: 'string', prettyName: 'Numeral' },
 
-      /////////////// Sección en blanco a menos que "¿El acto administrativo es correcto?" sea igual a "No"
       {
         modelName: 'ActoAdministrativo',
         name: 'tipo',
@@ -182,21 +195,27 @@ export const cargosRouter = createTRPCRouter({
       { modelName: 'DatosActo', name: 'literal', type: 'string', prettyName: 'Literal correcto' },
       { modelName: 'DatosActo', name: 'numeral', type: 'string', prettyName: 'Numeral correcto' },
 
-      // 'OBSERVACIONES (Para nombre del despacho, cargo y grado) ',
+      {
+        modelName: 'DatosValidacion',
+        name: 'observacionesDespacho',
+        type: 'string',
+        prettyName: 'Observaciones del nombre del despacho, cargo y grado',
+      },
 
+      // En carrera, En periodo individual, En libre nombramiento
       {
         modelName: 'DatosDeaj',
         name: 'claseNombramiento',
         type: 'string',
         prettyName: 'Clasificación del empleo (Art. 130 Ley 270)',
-        // En carrera, En periodo individual, En libre nombramiento
       },
+
+      // En propiedad, En provisionalidad, En encargo, Cargo vacante
       {
         modelName: 'DatosDeaj',
-        name: '', // ----- DatosCsj.estadoActual: PROPIEDAD, VACANTE ?????
+        name: '',
         type: 'string',
         prettyName: 'Forma de provisión del cargo (Art. 132 Ley 270)',
-        // En propiedad, En provisionalidad, En encargo, Cargo vacante
       },
       {
         modelName: 'DatosCsj',
@@ -226,17 +245,16 @@ export const cargosRouter = createTRPCRouter({
       },
 
       {
-        modelName: 'DatosDeaj',
-        name: '',
+        modelName: 'DatosEncuesta',
+        name: 'tieneServidorProv',
         type: 'string',
-        prettyName: 'El cargo tiene servidor en provisionalidad?', // Si, No
+        prettyName: 'El cargo tiene servidor en provisionalidad?',
       },
       {
         modelName: 'DatosDeaj',
-        name: '',
+        name: 'conFechaFin',
         type: 'string',
         prettyName: 'La provisionalidad tiene fecha de terminación',
-        // 'La provisionalidad tiene fecha de terminación?', // Si cuando hay una fecha en que finaliza la provisionalidad, No en caso contrario
       },
       {
         modelName: 'DatosDeaj',
@@ -246,13 +264,13 @@ export const cargosRouter = createTRPCRouter({
       },
       {
         modelName: 'DatosDeaj',
-        name: 'nombreReemplazo',
+        name: 'servidor',
         type: 'string',
         prettyName: 'Nombres del servidor judicial en provisionalidad',
       },
       {
-        modelName: 'DatosDeaj',
-        name: 'apellidosReemplazo',
+        modelName: 'DatosEncuesta',
+        name: 'apellidosProv',
         type: 'string',
         prettyName: 'Apellidos del servidor judicial en provisionalidad',
       },
@@ -296,24 +314,91 @@ export const cargosRouter = createTRPCRouter({
         prettyName: 'Profesión 3 (Profesión adicional)',
       },
       {
-        modelName: 'DatosEncuesta',
-        name: 'observaciones',
+        modelName: 'DatosValidacion',
+        name: 'observacionesClasificacion',
         type: 'string',
-        prettyName: 'Observaciones',
+        prettyName: 'Observaciones del nombre del despacho, cargo y grado',
       },
 
-      // 'TIPO DE NOVEDAD (Movimiento del Cargo)',
-      // 'TIPO DE TRASLADO',
-      // 'JURISDICCIÓN DESTINO (Traslado)',
-      // 'DISTRITO DESTINO (Traslado)',
-      // 'CIRCUITO DESTINO (Traslado)',
-      // 'MUNICIPIO DESTINO (Traslado)',
-      // 'DESPACHO DESTINO (Traslado)',
-      // 'CÓDIGO DEL DESPACHO DESTINO (Traslado)',
-      // 'TIPO DE ACTO ADMINISTRATIVO (Traslado o supresión)',
-      // 'NÚMERO DE ACTO ADMINISTRATIVO (Traslado o supresión)',
-      // 'AÑO DEL ACTO ADMINISTRATIVO (Traslado o supresión)',
-      // 'OBSERVACIONES DE LA NOVEDAD (Traslado o supresión)',
+      {
+        modelName: 'DatosValidacion',
+        name: 'observacionesClasificacion',
+        type: 'string',
+        prettyName: 'Observaciones del nombre del despacho, cargo y grado',
+      },
+
+      {
+        modelName: 'DatosValidacion',
+        name: 'tipoNovedad',
+        type: 'string',
+        prettyName: 'Tipo de novedad',
+      },
+      {
+        modelName: 'DatosValidacion',
+        name: 'tipoTraslado',
+        type: 'string',
+        prettyName: 'Tipo de traslado',
+      },
+      {
+        modelName: 'DatosValidacion',
+        name: 'jurisdiccionTraslado',
+        type: 'string',
+        prettyName: 'Jurisdicción de destino',
+      },
+      {
+        modelName: 'DatosValidacion',
+        name: 'distritoDestinoTraslado',
+        type: 'string',
+        prettyName: 'Distrito de destino',
+      },
+      {
+        modelName: 'DatosValidacion',
+        name: 'circuitoDestinoTraslado',
+        type: 'string',
+        prettyName: 'Circuito de destino',
+      },
+      {
+        modelName: 'DatosValidacion',
+        name: 'municipioDestinoTraslado',
+        type: 'string',
+        prettyName: 'Municipio de destino',
+      },
+      {
+        modelName: 'DatosValidacion',
+        name: 'despachoDestinoTraslado',
+        type: 'string',
+        prettyName: 'Despacho de destino',
+      },
+      {
+        modelName: 'DatosValidacion',
+        name: 'codigoDespachoDestinoTraslado',
+        type: 'string',
+        prettyName: 'Código de despacho de destino',
+      },
+      {
+        modelName: 'ActoDatosValidacion',
+        name: 'tipo',
+        type: 'string',
+        prettyName: 'Tipo de acto administrativo (Traslado o supresión)',
+      },
+      {
+        modelName: 'ActoDatosValidacion',
+        name: 'numero',
+        type: 'string',
+        prettyName: 'Número de acto administrativo (Traslado o supresión)',
+      },
+      {
+        modelName: 'ActoDatosValidacion',
+        name: 'anio',
+        type: 'string',
+        prettyName: 'Año de acto administrativo (Traslado o supresión)',
+      },
+      {
+        modelName: 'DatosValidacion',
+        name: 'observacionesNovedad',
+        type: 'string',
+        prettyName: 'Observaciones de la novedad (Traslado o supresión)',
+      },
 
       { modelName: 'DatosDeaj', name: 'idOcurrenciaTitular', type: 'string', prettyName: 'ID ocurrencia titular' },
     ]

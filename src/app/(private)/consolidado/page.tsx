@@ -5,13 +5,14 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~
 import { cn } from '~/lib/utils'
 import { api } from '~/trpc/server'
 
-const bgBymodelName = {
+const bgBymodelName: Record<string, string> = {
   DatosUdae: 'bg-sky-50',
   DatosCsj: 'bg-lime-50',
   DatosDeaj: 'bg-amber-50',
   ActoAdministrativo: 'bg-pink-50',
   DatosActo: 'bg-pink-50',
   DatosEncuesta: 'bg-lime-50',
+  DatosValidacion: 'bg-lime-100',
 }
 
 export default async function Consolidado() {
@@ -34,7 +35,7 @@ export default async function Consolidado() {
             {registros.map((item) => (
               <TableRow key={item.id}>
                 {columns.map(({ modelName, name }) => {
-                  let fila = {}
+                  let fila: Record<string, any> = {}
 
                   if (modelName === 'DatosUdae') fila = item
                   else if (modelName === 'DatosCsj') fila = item.enlaceCsj?.datosCsj || {}
@@ -43,6 +44,7 @@ export default async function Consolidado() {
                     fila = item.datosActoAdministrativo?.actoAdministrativo || {}
                   else if (modelName === 'DatosActo') fila = item.datosActoAdministrativo || {}
                   else if (modelName === 'DatosEncuesta') fila = item.datosEncuesta || {}
+                  else if (modelName === 'DatosValidacion') fila = item.datosValidacion || {}
 
                   return (
                     <TableCell className={cn('bg- max-w-lg truncate text-nowrap', bgBymodelName[modelName])} key={name}>
