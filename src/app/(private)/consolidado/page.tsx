@@ -22,7 +22,7 @@ export default async function Consolidado() {
     <div className="w-full max-w-full space-y-4">
       <h1>Consolidado ({registros.length} registros)</h1>
 
-      <ScrollArea className="h-[920px] rounded-md border">
+      <ScrollArea className="h-[640px] rounded-md border">
         <Table>
           <TableHeader className="sticky top-0">
             <TableRow>
@@ -32,23 +32,16 @@ export default async function Consolidado() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {registros.map((item) => (
-              <TableRow key={item.id}>
+            {registros.map((fila) => (
+              <TableRow key={fila.id?.value}>
                 {columns.map(({ modelName, name }) => {
-                  let fila: Record<string, any> = {}
-
-                  if (modelName === 'DatosUdae') fila = item
-                  else if (modelName === 'DatosCsj') fila = item.enlaceCsj?.datosCsj || {}
-                  else if (modelName === 'DatosDeaj') fila = item.enlaceDeaj?.datosDeaj || {}
-                  else if (modelName === 'ActoAdministrativo')
-                    fila = item.datosActoAdministrativo?.actoAdministrativo || {}
-                  else if (modelName === 'DatosActo') fila = item.datosActoAdministrativo || {}
-                  else if (modelName === 'DatosEncuesta') fila = item.datosEncuesta || {}
-                  else if (modelName === 'DatosValidacion') fila = item.datosValidacion || {}
-
+                  const columnName = `${modelName}.${name}`
                   return (
-                    <TableCell className={cn('bg- max-w-lg truncate text-nowrap', bgBymodelName[modelName])} key={name}>
-                      {fila[name] ? String(fila[name]) : '-'}
+                    <TableCell
+                      className={cn('bg- max-w-lg truncate text-nowrap', bgBymodelName[modelName])}
+                      key={columnName}
+                    >
+                      {fila[columnName]?.value}
                     </TableCell>
                   )
                 })}

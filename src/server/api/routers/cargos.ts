@@ -269,10 +269,12 @@ export const cargosRouter = createTRPCRouter({
         prettyName: 'Nombres del servidor judicial en provisionalidad',
       },
       {
-        modelName: 'DatosEncuesta',
-        name: 'apellidosProv',
+        // modelName: 'DatosEncuesta',
+        // name: 'apellidosProv',
+        modelName: 'DatosDeaj',
+        name: 'servidorApellidos',
         type: 'string',
-        prettyName: 'Apellidos del servidor judicial en provisionalidad',
+        prettyName: 'Nombres del servidor judicial en provisionalidad',
       },
       {
         modelName: 'DatosEncuesta',
@@ -406,7 +408,7 @@ export const cargosRouter = createTRPCRouter({
     const totalUdae = await ctx.db.datosUdae.count()
     const avanceCsj = await ctx.db.enlaceCsj.count()
     const avanceDeaj = await ctx.db.enlaceDeaj.count()
-    const totalDeaj = await ctx.db.datosDeaj.count({ where: { claseNombramiento: 'Provisionalidad' } })
+    const totalDeaj = await ctx.db.datosDeaj.count()
     const totalActos = await ctx.db.enlaceActoAdministrativo.count()
 
     const datosAvance = {
@@ -422,6 +424,51 @@ export const cargosRouter = createTRPCRouter({
       porcInfoTrabajadores: 0,
     }
 
-    return { registros, columns, datosAvance }
+    const flatRegistros = registros.map((item) => {
+      const flat = columns
+        .map((column) => {
+          const { name, type, prettyName, modelName } = column
+
+          let fila: Record<string, any> = {}
+          if (modelName === 'DatosUdae') fila = item
+          else if (modelName === 'DatosCsj') fila = item.enlaceCsj?.datosCsj || {}
+          else if (modelName === 'DatosDeaj') fila = item.enlaceDeaj?.datosDeaj || {}
+          else if (modelName === 'ActoAdministrativo') fila = item.datosActoAdministrativo?.actoAdministrativo || {}
+          else if (modelName === 'DatosActo') fila = item.datosActoAdministrativo || {}
+          else if (modelName === 'DatosEncuesta') fila = item.datosEncuesta || {}
+          else if (modelName === 'DatosValidacion') fila = item.datosValidacion || {}
+
+          const value = fila?.[name] ? String(fila[name]) : ''
+          return { name: `${modelName}.${name}`, type, prettyName, value }
+        })
+        .reduce((acc, item) => ({ ...acc, [item.name]: { type: item.type, value: item.value } }), {
+          id: { type: 'string', value: item.id },
+        }) as Record<string, { type: string; value: string }>
+
+      const servidorEnPropiedad = flat['DatosDeaj.claseNombramiento']?.value === 'Propiedad'
+
+      const nombreCompletoDeaj = (servidorEnPropiedad && flat['DatosDeaj.servidor']?.value) || ''
+      const nombreCompleto = flat['DatosCsj.propiedad']?.value || nombreCompletoDeaj
+      const { nombres, apellidos } = separarNombre(nombreCompleto)
+      flat['DatosCsj.propiedadApellidos'] = { type: 'string', value: apellidos }
+      flat['DatosCsj.propiedad'] = { type: 'string', value: nombres }
+
+      if (flat['DatosDeaj.servidor']?.value) {
+        const nombreCompleto = flat['DatosDeaj.servidor'].value
+        const { nombres, apellidos } = separarNombre(nombreCompleto)
+        flat['DatosDeaj.servidorApellidos'] = { type: 'string', value: servidorEnPropiedad ? '' : apellidos }
+        flat['DatosDeaj.servidor'] = { type: 'string', value: servidorEnPropiedad ? '' : nombres }
+      }
+
+      return flat
+    })
+
+    return { registros: flatRegistros, columns, datosAvance }
   }),
 })
+
+const separarNombre = (nombreCompleto: string = '') => {
+  const apellidos = nombreCompleto.split(' ').filter(Boolean).slice(-2).join(' ')
+  const nombres = nombreCompleto.replace(apellidos, '').trim()
+  return { nombres, apellidos }
+}
