@@ -235,7 +235,7 @@ export const cargosRouter = createTRPCRouter({
         type: 'string',
         prettyName: 'Tipo de documento de identidad',
       },
-      { modelName: 'DatosEncuesta', name: 'cedula', type: 'string', prettyName: 'Número de documento de identidad' },
+      { modelName: 'DatosEncuesta', name: 'documento', type: 'string', prettyName: 'Número de documento de identidad' },
       { modelName: 'DatosEncuesta', name: 'nivelEscolaridad', type: 'string', prettyName: 'Nivel de escolaridad' },
       {
         modelName: 'DatosEncuesta',
@@ -274,7 +274,7 @@ export const cargosRouter = createTRPCRouter({
         modelName: 'DatosDeaj',
         name: 'servidorApellidos',
         type: 'string',
-        prettyName: 'Nombres del servidor judicial en provisionalidad',
+        prettyName: 'Apellidos del servidor judicial en provisionalidad',
       },
       {
         modelName: 'DatosEncuesta',
@@ -284,7 +284,7 @@ export const cargosRouter = createTRPCRouter({
       },
       {
         modelName: 'DatosEncuesta',
-        name: 'cedulaProv',
+        name: 'documentoProv',
         type: 'string',
         prettyName: 'Número de documento de identidad',
       },
@@ -445,19 +445,44 @@ export const cargosRouter = createTRPCRouter({
           id: { type: 'string', value: item.id },
         }) as Record<string, { type: string; value: string }>
 
-      const servidorEnPropiedad = flat['DatosDeaj.claseNombramiento']?.value === 'Propiedad'
+      const claseNombramiento = item.enlaceDeaj?.datosDeaj?.claseNombramiento
+      const servidorEnPropiedad = !claseNombramiento || claseNombramiento === 'Propiedad'
 
-      const nombreCompletoDeaj = (servidorEnPropiedad && flat['DatosDeaj.servidor']?.value) || ''
-      const nombreCompleto = flat['DatosCsj.propiedad']?.value || nombreCompletoDeaj
+      const nombreCompletoDeaj = (servidorEnPropiedad && item.enlaceDeaj?.datosDeaj?.servidor) || ''
+      const nombreCompleto = item.enlaceCsj?.datosCsj?.propiedad || nombreCompletoDeaj
       const { nombres, apellidos } = separarNombre(nombreCompleto)
       flat['DatosCsj.propiedadApellidos'] = { type: 'string', value: apellidos }
       flat['DatosCsj.propiedad'] = { type: 'string', value: nombres }
 
       if (flat['DatosDeaj.servidor']?.value) {
-        const nombreCompleto = flat['DatosDeaj.servidor'].value
+        const nombreCompleto = item.enlaceDeaj?.datosDeaj?.servidor
         const { nombres, apellidos } = separarNombre(nombreCompleto)
-        flat['DatosDeaj.servidorApellidos'] = { type: 'string', value: servidorEnPropiedad ? '' : apellidos }
-        flat['DatosDeaj.servidor'] = { type: 'string', value: servidorEnPropiedad ? '' : nombres }
+        flat['DatosDeaj.servidorApellidos'] = { type: 'string', value: !servidorEnPropiedad ? apellidos : '' }
+        flat['DatosDeaj.servidor'] = { type: 'string', value: !servidorEnPropiedad ? nombres : '' }
+      }
+
+      flat['DatosEncuesta.tieneServidorProv'] = { type: 'string', value: !servidorEnPropiedad ? 'Si' : 'No' }
+
+      const documentoDeaj = (servidorEnPropiedad && item.enlaceDeaj?.datosDeaj?.numDocumento) || ''
+      const documento = item.enlaceCsj?.datosCsj.cedula || documentoDeaj || ''
+      flat['DatosEncuesta.tipoDocumento'] = { type: 'string', value: documento ? 'Cédula de ciudadanía' : '' }
+      flat['DatosEncuesta.documento'] = { type: 'string', value: documento }
+
+      const fechaFinProv = item.enlaceDeaj?.datosDeaj?.fechaFin
+      let conFechaFin = ''
+      if (!servidorEnPropiedad) conFechaFin = fechaFinProv ? 'Si' : 'No'
+
+      flat['DatosDeaj.conFechaFin'] = { type: 'string', value: conFechaFin }
+
+      const documentoProv =
+        (!servidorEnPropiedad && item.enlaceCsj?.datosCsj.cedula) || item.enlaceDeaj?.datosDeaj?.numDocumento || ''
+      flat['DatosEncuesta.tipoDocumentoProv'] = {
+        type: 'string',
+        value: !servidorEnPropiedad && documentoProv ? 'Cédula de ciudadanía' : '',
+      }
+      flat['DatosEncuesta.documentoProv'] = {
+        type: 'string',
+        value: !servidorEnPropiedad && documentoProv ? documentoProv : '',
       }
 
       return flat
@@ -468,7 +493,9 @@ export const cargosRouter = createTRPCRouter({
 })
 
 const separarNombre = (nombreCompleto: string = '') => {
-  const apellidos = nombreCompleto.split(' ').filter(Boolean).slice(-2).join(' ')
+  // Eliminar espacios en blanco
+  nombreCompleto = nombreCompleto.split(' ').filter(Boolean).join(' ')
+  const apellidos = nombreCompleto.split(' ').slice(-2).join(' ')
   const nombres = nombreCompleto.replace(apellidos, '').trim()
   return { nombres, apellidos }
 }

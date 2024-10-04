@@ -206,7 +206,7 @@ model DatosEncuesta {
   profesion3                 String    @default("")
   tieneServidorProv          String    @default("No") //Si, No
   tipoDocumentoProv          String    @default("")
-  cedulaProv                 String    @default("")
+  documentoProv              String    @default("")
   nombresProv                String    @default("")
   apellidosProv              String    @default("")
   nivelEscolaridadProv       String    @default("")

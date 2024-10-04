@@ -22,35 +22,41 @@ export default async function Consolidado() {
     <div className="w-full max-w-full space-y-4">
       <h1>Consolidado ({registros.length} registros)</h1>
 
-      <ScrollArea className="h-[640px] rounded-md border">
-        <Table>
-          <TableHeader className="sticky top-0">
-            <TableRow>
-              {columns.map(({ name, prettyName }) => (
-                <TableHead key={name}>{prettyName}</TableHead>
+      <div className="mx-auto max-w-full rounded-lg border">
+        <div className="max-h-[640px] overflow-auto">
+          <table className="w-full border-collapse">
+            <thead className="sticky top-0 z-10 bg-background">
+              <tr>
+                {columns.map(({ name, prettyName }) => (
+                  <th key={name} className="border-b text-center font-normal leading-none text-muted-foreground">
+                    {prettyName}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {registros.map((fila) => (
+                <tr key={fila.id?.value} className="hover:bg-muted/50">
+                  {columns.map(({ modelName, name }) => {
+                    const columnName = `${modelName}.${name}`
+                    return (
+                      <td
+                        key={columnName}
+                        className={cn(
+                          'min-w-40 max-w-lg truncate text-nowrap border-b text-center',
+                          bgBymodelName[modelName],
+                        )}
+                      >
+                        {fila[columnName]?.value}
+                      </td>
+                    )
+                  })}
+                </tr>
               ))}
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {registros.map((fila) => (
-              <TableRow key={fila.id?.value}>
-                {columns.map(({ modelName, name }) => {
-                  const columnName = `${modelName}.${name}`
-                  return (
-                    <TableCell
-                      className={cn('bg- max-w-lg truncate text-nowrap', bgBymodelName[modelName])}
-                      key={columnName}
-                    >
-                      {fila[columnName]?.value}
-                    </TableCell>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-        <ScrollBar orientation="horizontal" />
-      </ScrollArea>
+            </tbody>
+          </table>
+        </div>
+      </div>
 
       <div className="flex flex-row flex-wrap gap-4">
         <ProgressCard
