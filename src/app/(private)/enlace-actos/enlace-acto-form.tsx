@@ -1,6 +1,8 @@
 'use client'
 
 import { ActoAdministrativo } from '@prisma/client'
+import { FileIcon } from 'lucide-react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Button } from '~/components/ui/button'
@@ -26,6 +28,7 @@ type ActoFormProps = {
 
 export function EnlaceActoForm({ datosUdaeId, actosAdministrativosList }: ActoFormProps) {
   const [open, setOpen] = useState(false)
+  const [actoId, setActoId] = useState<string | undefined>(undefined)
   const router = useRouter()
 
   const { data: datosEnlace, refetch } = api.enlaceActos.datosFormularioEdicion.useQuery({ datosUdaeId })
@@ -61,6 +64,13 @@ export function EnlaceActoForm({ datosUdaeId, actosAdministrativosList }: ActoFo
   }
 
   const title = `${datosEnlace?.datosActoAdministrativo?.id ? 'Editar' : 'Registrar'}`
+  const actoSugerido = actosAdministrativosList.find(
+    (acto) =>
+      acto.anio === datosEnlace?.anioActoAdministrativo?.toString() &&
+      acto.numero === datosEnlace?.numeroActoAdministrativo,
+  )
+  const defaultActoAdministrativoId = datosEnlace?.datosActoAdministrativo?.actoAdministrativoId || actoSugerido?.id
+  const acto = actosAdministrativosList.find((acto) => acto.id === actoId)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -78,22 +88,32 @@ export function EnlaceActoForm({ datosUdaeId, actosAdministrativosList }: ActoFo
               <Label htmlFor="actoAdministrativoId" className="text-right">
                 Acto
               </Label>
-              <Select
-                name="actoAdministrativoId"
-                defaultValue={datosEnlace?.datosActoAdministrativo?.actoAdministrativoId}
-                required
-              >
-                <SelectTrigger className="w-64">
-                  <SelectValue placeholder="Seleccione el acto administrativo" />
-                </SelectTrigger>
-                <SelectContent>
-                  {actosAdministrativosList?.map((acto) => (
-                    <SelectItem value={acto.id} key={acto.id}>
-                      {acto.anio}: {acto.tipo} {acto.numero}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <div className="col-span-3 flex w-full flex-row items-center gap-2">
+                <Select
+                  name="actoAdministrativoId"
+                  defaultValue={defaultActoAdministrativoId}
+                  onValueChange={setActoId}
+                  value={actoId}
+                  required
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Seleccione el acto administrativo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {actosAdministrativosList?.map((acto) => (
+                      <SelectItem value={acto.id} key={acto.id}>
+                        {acto.anio}: {acto.tipo} {acto.numero}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+
+                {acto?.enlace && (
+                  <Link href={acto.enlace} target="_blank" rel="noopener noreferrer">
+                    <FileIcon className="m-2 h-4 w-4" />
+                  </Link>
+                )}
+              </div>
             </div>
 
             <div className="grid grid-cols-4 items-center gap-4">
