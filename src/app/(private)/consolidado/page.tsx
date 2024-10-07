@@ -1,7 +1,7 @@
+import { redirect } from 'next/navigation'
+import { UnauthorizedUserMessage } from '~/app/_components/unauthorized-user'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Progress } from '~/components/ui/progress'
-import { ScrollArea, ScrollBar } from '~/components/ui/scroll-area'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 import { cn } from '~/lib/utils'
 import { api } from '~/trpc/server'
 
@@ -17,6 +17,15 @@ const bgBymodelName: Record<string, string> = {
 
 export default async function Consolidado() {
   const { columns, registros, datosAvance } = await api.cargos.getConsolidado()
+
+  const { userId } = await api.users.getLoggedUser()
+  if (!userId) redirect('/login')
+
+  const user = await api.users.byId({ userId })
+  if (!user) redirect('/login')
+
+  if (user.role !== 'csj' && user.role !== 'deaj')
+    return <UnauthorizedUserMessage email={`${user.username}@cendoj.ramajudicial.gov.co`} />
 
   return (
     <div className="w-full max-w-full space-y-4">

@@ -1,9 +1,11 @@
+import { FileTextIcon } from 'lucide-react'
+import Link from 'next/link'
+import { redirect } from 'next/navigation'
+import { UnauthorizedUserMessage } from '~/app/_components/unauthorized-user'
 import { ScrollArea, ScrollBar } from '~/components/ui/scroll-area'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
 import { api } from '~/trpc/server'
 import { ActoForm } from './acto-form'
-import Link from 'next/link'
-import { FileTextIcon } from 'lucide-react'
 
 export default async function Consolidado() {
   const { actos, columns } = await api.actos.getList()
@@ -11,6 +13,15 @@ export default async function Consolidado() {
   const filteredColumns = columns.filter(
     (column) => column.name !== 'id' && column.name !== 'enlacesUdae' && column.name !== 'datosValidacionCargo',
   )
+
+  const { userId } = await api.users.getLoggedUser()
+  if (!userId) redirect('/login')
+
+  const user = await api.users.byId({ userId })
+  if (!user) redirect('/login')
+
+  if (user.role !== 'csj' && user.role !== 'deaj')
+    return <UnauthorizedUserMessage email={`${user.username}@cendoj.ramajudicial.gov.co`} />
 
   return (
     <div className="w-full max-w-lg space-y-4">

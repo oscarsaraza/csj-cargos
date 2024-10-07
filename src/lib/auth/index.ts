@@ -97,20 +97,24 @@ export const logout = async () => {
 }
 
 export const validateSession = async () => {
-  let authCookie = cookies().get(lucia.sessionCookieName)
-  if (!authCookie) return { success: false, message: 'Sesión no válida.' }
+  try {
+    let authCookie = cookies().get(lucia.sessionCookieName)
+    if (!authCookie) return { success: false, message: 'Sesión no válida.' }
 
-  const { name, value } = authCookie
-  const sessionId = lucia.readSessionCookie(`${name}=${value}`)
-  if (!sessionId) return { success: false, message: 'Sesión no válida.' }
+    const { name, value } = authCookie
+    const sessionId = lucia.readSessionCookie(`${name}=${value}`)
+    if (!sessionId) return { success: false, message: 'Sesión no válida.' }
 
-  const { user, session } = await lucia.validateSession(sessionId)
+    const { user, session } = await lucia.validateSession(sessionId)
 
-  if (session?.fresh) {
-    authCookie = lucia.createSessionCookie(sessionId)
-  } else if (!session) {
-    authCookie = lucia.createBlankSessionCookie()
+    if (session?.fresh) {
+      authCookie = lucia.createSessionCookie(sessionId)
+    } else if (!session) {
+      authCookie = lucia.createBlankSessionCookie()
+    }
+
+    return { success: true, authCookie, user, session }
+  } catch (error) {
+    return { success: false, message: 'Sesión no válida.' }
   }
-
-  return { success: true, authCookie, user, session }
 }

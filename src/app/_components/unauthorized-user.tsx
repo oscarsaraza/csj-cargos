@@ -2,7 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 
 export function UnauthorizedUserMessage({ email }: { email: string }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+    <div className="flex items-center justify-center bg-gray-100">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-center text-2xl font-bold">Acceso no autorizado</CardTitle>

@@ -6,6 +6,7 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
+import { UserRole } from '@prisma/client'
 import { initTRPC } from '@trpc/server'
 import superjson from 'superjson'
 import { ZodError } from 'zod'
@@ -113,28 +114,21 @@ export const publicProcedure = t.procedure.use(timingMiddleware)
  * the session is valid and guarantees `ctx.session.user` is not null.
  */
 const authMiddleware = t.middleware(async ({ next, ctx }) => {
+  const emptyCtx = { user: { userId: '', username: '', role: '' as UserRole } }
+
   const validationResult = await validateSession()
-  if (!validationResult.success || !validationResult.session?.id)
-    return next({
-      ctx: {
-        user: { userId: '', username: '' },
-      },
-    })
+  if (!validationResult.success || !validationResult.session?.id) return next({ ctx: emptyCtx })
 
   const session = await db.session.findUnique({
     where: { id: validationResult.session.id },
     select: { userId: true, username: true },
   })
-  if (!session) return next({ ctx })
+  if (!session) return next({ ctx: emptyCtx })
 
   const user = await db.user.findUnique({ where: { id: session.userId } })
-  if (!user || !['csj', 'deaj'].includes(user.role)) return next({ ctx })
+  if (!user || !['csj', 'deaj', 'external', 'office'].includes(user.role)) return next({ ctx: emptyCtx })
 
-  return next({
-    ctx: {
-      user: { userId: session.userId, username: session.username },
-    },
-  })
+  return next({ ctx: { user: { userId: session.userId, username: session.username, role: user.role } } })
 })
 
 export const protectedProcedure = t.procedure.use(authMiddleware)

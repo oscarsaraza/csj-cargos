@@ -11,7 +11,10 @@ export default async function Home() {
   const user = await api.users.byId({ userId })
   if (!user) redirect('/login')
 
-  if (user.role === 'external') return <UnauthorizedUserMessage email={`${user.username}@cendoj.ramajudicial.gov.co`} />
+  if (user.role === 'office') redirect('/actualizacion')
+
+  if (user.role !== 'csj' && user.role !== 'deaj')
+    return <UnauthorizedUserMessage email={`${user.username}@cendoj.ramajudicial.gov.co`} />
 
   return (
     <HydrateClient>

@@ -21,7 +21,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="es" className={`${GeistSans.variable}`}>
       <body>
-        <Header username={user.username} />
+        <Header username={user.username} role={user.role} />
         <main className="flex flex-col items-center">
           <div className="container flex flex-col items-center gap-12 px-4 py-16">
             <TRPCReactProvider>{children}</TRPCReactProvider>
