@@ -28,6 +28,13 @@ const HeaderLink = ({ href, label }: { href: string; label: string }) => {
   )
 }
 
+const rolePrettyNames: Record<UserRole, string> = {
+  csj: 'CSJ',
+  deaj: 'DEAJ',
+  office: 'Despacho',
+  external: 'Externo',
+}
+
 export function Header({ username, role }: { username: string; role: UserRole }) {
   const router = useRouter()
 
@@ -53,7 +60,7 @@ export function Header({ username, role }: { username: string; role: UserRole })
 
       <div className="flex flex-row items-center gap-2">
         <span className="font-bold text-sky-800">
-          {username} - {role}
+          {username} ({rolePrettyNames[role]})
         </span>
         <Button variant="link" onClick={onLogout}>
           Cerrar sesión
