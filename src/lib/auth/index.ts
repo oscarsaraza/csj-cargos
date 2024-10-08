@@ -65,7 +65,17 @@ export const requestLoginCode = async (
   const user = await db.user.findFirst({ where: { username } })
   const passwordExpiresAt = dayjs().add(10, 'minutes').toDate()
 
-  if (!user) await db.user.create({ data: { username, password: passwordHash, passwordExpiresAt } })
+  const despacho = await db.despacho.findFirst({ where: { email: to } })
+
+  if (!user)
+    await db.user.create({
+      data: {
+        username,
+        password: passwordHash,
+        passwordExpiresAt,
+        role: despacho ? 'office' : 'external',
+      },
+    })
   else await db.user.update({ where: { id: user.id }, data: { password: passwordHash, passwordExpiresAt } })
 
   return { success: true, username }
