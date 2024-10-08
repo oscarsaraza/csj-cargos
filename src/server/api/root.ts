@@ -1,8 +1,9 @@
 import { createCallerFactory, createTRPCRouter } from '~/server/api/trpc'
 import { actosRouter } from './routers/actos'
 import { cargosRouter } from './routers/cargos'
-import { usersRouter } from './routers/users'
+import { encuestaRouter } from './routers/encuesta'
 import { enlaceActosRouter } from './routers/enlaceActos'
+import { usersRouter } from './routers/users'
 
 /**
  * This is the primary router for your server.
@@ -11,6 +12,7 @@ import { enlaceActosRouter } from './routers/enlaceActos'
  */
 export const appRouter = createTRPCRouter({
   actos: actosRouter,
+  encuestas: encuestaRouter,
   enlaceActos: enlaceActosRouter,
   cargos: cargosRouter,
   users: usersRouter,

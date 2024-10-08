@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { nullable, z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '~/server/api/trpc'
 
 export const enlaceActosRouter = createTRPCRouter({
@@ -10,7 +10,7 @@ export const enlaceActosRouter = createTRPCRouter({
         articulo: z.string(),
         literal: z.string().nullable(),
         numeral: z.string().nullable(),
-        perfilCargo: z.string().nullable(),
+        perfilCargo: z.string().default(''),
       }),
     )
     .mutation(async ({ ctx, input }) => {

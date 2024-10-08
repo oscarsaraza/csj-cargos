@@ -212,6 +212,9 @@ model DatosEncuesta {
   apellidosProv              String    @default("")
   nivelEscolaridadProv       String    @default("")
   familiaresDependientesProv Int       @default(0)
+  profesion1Prov             String    @default("")
+  profesion2Prov             String    @default("")
+  profesion3Prov             String    @default("")
   datosUdaeId                String    @unique @db.ObjectId
   datosUdae                  DatosUdae @relation(fields: [datosUdaeId], references: [id])
 }
@@ -236,4 +239,12 @@ model DatosValidacionCargo {
   actoAdministrativoId          String             @db.ObjectId
   actoAdministrativo            ActoAdministrativo @relation(fields: [actoAdministrativoId], references: [id])
   observacionesNovedad          String             @default("") // Observaciones de la novedad (traslado o supresión)
+}
+
+model Despacho {
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  nombre    String @unique
+  codigo    String @unique
+  municipio String
+  email     String @unique
 }

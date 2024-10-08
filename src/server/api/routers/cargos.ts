@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { createTRPCRouter, protectedProcedure } from '~/server/api/trpc'
 import { getModelColumns, modelCsj, modelDeaj, modelUdae, orderTableColumns } from './_utils'
+import { separarNombre } from '~/lib/utils'
 
 const udaeColumnsOrder = ['municipioSedeFisica', 'descripcionCargo', 'nombreDespacho']
 const csjColumnsOrder = ['municipio', 'cargo', 'depacho', 'propiedad']
@@ -491,11 +492,3 @@ export const cargosRouter = createTRPCRouter({
     return { registros: flatRegistros, columns, datosAvance }
   }),
 })
-
-const separarNombre = (nombreCompleto: string = '') => {
-  // Eliminar espacios en blanco
-  nombreCompleto = nombreCompleto.split(' ').filter(Boolean).join(' ')
-  const apellidos = nombreCompleto.split(' ').slice(-2).join(' ')
-  const nombres = nombreCompleto.replace(apellidos, '').trim()
-  return { nombres, apellidos }
-}
