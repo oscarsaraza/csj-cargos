@@ -192,14 +192,14 @@ model EnlaceActoAdministrativo {
 model DatosEncuesta {
   id                         String    @id @default(auto()) @map("_id") @db.ObjectId
   // Cédula de ciudadanía, Cédula de extranjería, Número Único de Identificación Personal (NUIP)
-  tipoDocumento              String
-  documento                  String
-  nombres                    String
-  apellidos                  String
+  tipoDocumento              String    @default("")
+  documento                  String    @default("")
+  nombres                    String    @default("")
+  apellidos                  String    @default("")
   // Bachiller, Tecnólogo, Técnico, Profesional, Pos grado, Doctorado, Pos doctorado
-  nivelEscolaridad           String
+  nivelEscolaridad           String    @default("")
   // Número de familiares dependientes con los que convive (1er grado de consanguinidad/afinidad)
-  familiaresDependientes     Int
+  familiaresDependientes     Int?
   // profesion1 Debe ser una de las profesiones del perfil del cargo.
   // Si no coincide, permitir agregar pero dejar la observación.
   profesion1                 String    @default("")
@@ -211,12 +211,15 @@ model DatosEncuesta {
   nombresProv                String    @default("")
   apellidosProv              String    @default("")
   nivelEscolaridadProv       String    @default("")
-  familiaresDependientesProv Int       @default(0)
+  familiaresDependientesProv Int?
   profesion1Prov             String    @default("")
   profesion2Prov             String    @default("")
   profesion3Prov             String    @default("")
   datosUdaeId                String    @unique @db.ObjectId
   datosUdae                  DatosUdae @relation(fields: [datosUdaeId], references: [id])
+  createdAt                  DateTime  @default(now())
+
+  @@unique([tipoDocumento, documento])
 }
 
 model DatosValidacionCargo {

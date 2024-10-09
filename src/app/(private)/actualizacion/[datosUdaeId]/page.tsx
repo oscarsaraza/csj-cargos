@@ -8,7 +8,7 @@ export default async function EncuestaActualizacionDatosPage({ params }: { param
   if (!data) return <div>Ha ocurrido un error al consultar la información del cargo.</div>
 
   return (
-    <div className="flex flex-row flex-wrap justify-between gap-4">
+    <div className="flex w-full flex-row flex-wrap justify-center gap-4">
       <Card>
         <CardHeader>
           <CardTitle className="text-center text-2xl font-bold">Encuesta de actualizacion de datos</CardTitle>
@@ -25,7 +25,7 @@ export default async function EncuestaActualizacionDatosPage({ params }: { param
         </CardContent>
       </Card>
 
-      <EncuestaServidorForm data={data.data} defaults={data.defaults} />
+      <EncuestaServidorForm datosUdaeId={params.datosUdaeId} data={data.data} defaults={data.defaults} />
     </div>
   )
 }

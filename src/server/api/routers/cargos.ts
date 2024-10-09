@@ -411,6 +411,7 @@ export const cargosRouter = createTRPCRouter({
     const avanceDeaj = await ctx.db.enlaceDeaj.count()
     const totalDeaj = await ctx.db.datosDeaj.count()
     const totalActos = await ctx.db.enlaceActoAdministrativo.count()
+    const totalInfoTrabajadores = await ctx.db.datosEncuesta.count()
 
     const datosAvance = {
       totalUdae,
@@ -421,8 +422,8 @@ export const cargosRouter = createTRPCRouter({
       porcDeaj: (avanceDeaj / totalDeaj) * 100,
       totalActos,
       porcActos: (totalActos / totalUdae) * 100,
-      totalInfoTrabajadores: 0,
-      porcInfoTrabajadores: 0,
+      totalInfoTrabajadores,
+      porcInfoTrabajadores: (totalInfoTrabajadores / totalUdae) * 100,
     }
 
     const flatRegistros = registros.map((item) => {
