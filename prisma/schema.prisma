@@ -24,7 +24,6 @@ model User {
   enlacesDeaj                 EnlaceDeaj[]
   role                        UserRole                   @default(external)
   datosUdaeActoAdministrativo EnlaceActoAdministrativo[]
-  datosValidacionCargo        DatosValidacionCargo[]
 }
 
 model Session {
@@ -62,7 +61,6 @@ model DatosUdae {
   enlaceDeaj                      EnlaceDeaj?
   datosActoAdministrativo         EnlaceActoAdministrativo?
   datosEncuesta                   DatosEncuesta?
-  datosValidacion                 DatosValidacionCargo?
 }
 
 model EnlaceCsj {
@@ -160,13 +158,13 @@ enum TipoActoAdministrativo {
 }
 
 model ActoAdministrativo {
-  id                   String                     @id @default(auto()) @map("_id") @db.ObjectId
-  tipo                 TipoActoAdministrativo
-  anio                 String
-  numero               String
-  enlace               String                     @default("")
-  enlacesUdae          EnlaceActoAdministrativo[]
-  datosValidacionCargo DatosValidacionCargo[]
+  id            String                     @id @default(auto()) @map("_id") @db.ObjectId
+  tipo          TipoActoAdministrativo
+  anio          String
+  numero        String
+  enlace        String                     @default("")
+  enlacesUdae   EnlaceActoAdministrativo[]
+  DatosEncuesta DatosEncuesta[]
 
   @@unique([tipo, anio, numero])
 }
@@ -190,64 +188,58 @@ model EnlaceActoAdministrativo {
 }
 
 model DatosEncuesta {
-  id                         String    @id @default(auto()) @map("_id") @db.ObjectId
+  id                         String              @id @default(auto()) @map("_id") @db.ObjectId
   // Cédula de ciudadanía, Cédula de extranjería, Número Único de Identificación Personal (NUIP)
-  tipoDocumento              String    @default("")
-  documento                  String    @default("")
-  nombres                    String    @default("")
-  apellidos                  String    @default("")
+  tieneServidorProp          String              @default("No") //Si, No
+  tipoDocumento              String              @default("")
+  documento                  String              @default("")
+  nombres                    String              @default("")
+  apellidos                  String              @default("")
   // Bachiller, Tecnólogo, Técnico, Profesional, Pos grado, Doctorado, Pos doctorado
-  nivelEscolaridad           String    @default("")
+  nivelEscolaridad           String              @default("")
   // Número de familiares dependientes con los que convive (1er grado de consanguinidad/afinidad)
   familiaresDependientes     Int?
   // profesion1 Debe ser una de las profesiones del perfil del cargo.
   // Si no coincide, permitir agregar pero dejar la observación.
-  profesion1                 String    @default("")
-  profesion2                 String    @default("")
-  profesion3                 String    @default("")
-  tieneServidorProv          String    @default("No") //Si, No
-  tipoDocumentoProv          String    @default("")
-  documentoProv              String    @default("")
-  nombresProv                String    @default("")
-  apellidosProv              String    @default("")
-  nivelEscolaridadProv       String    @default("")
+  profesion1                 String              @default("")
+  profesion2                 String              @default("")
+  profesion3                 String              @default("")
+  tieneServidorProv          String              @default("No") //Si, No
+  tipoDocumentoProv          String              @default("")
+  documentoProv              String              @default("")
+  nombresProv                String              @default("")
+  apellidosProv              String              @default("")
+  nivelEscolaridadProv       String              @default("")
   familiaresDependientesProv Int?
-  profesion1Prov             String    @default("")
-  profesion2Prov             String    @default("")
-  profesion3Prov             String    @default("")
-  datosUdaeId                String    @unique @db.ObjectId
-  datosUdae                  DatosUdae @relation(fields: [datosUdaeId], references: [id])
-  createdAt                  DateTime  @default(now())
+  profesion1Prov             String              @default("")
+  profesion2Prov             String              @default("")
+  profesion3Prov             String              @default("")
+  cargoExiste                String              @default("") // Si, No, Si con novedad de traslado o supresión (requerir observacionesNovedad)
+  tipoNovedad                String              @default("") // Traslado o supresión
+  tipoTraslado               String              @default("") // Transitorio o permanente
+  despachoTrasladoDestinoId  String?             @db.ObjectId
+  despacho                   Despacho?           @relation(fields: [despachoTrasladoDestinoId], references: [id])
+  actoTrasladoId             String?             @db.ObjectId
+  actoTraslado               ActoAdministrativo? @relation(fields: [actoTrasladoId], references: [id])
+  observacionesNovedad       String              @default("") // Observaciones de la novedad (traslado o supresión)
+  observacionesDespacho      String              @default("") // Observaciones del nombre del despacho, cargo y grado
+  observacionesClasificacion String              @default("") // Obsevaciones de clasificacion, provisión del cargo y profesión
+  datosUdaeId                String              @unique @db.ObjectId
+  datosUdae                  DatosUdae           @relation(fields: [datosUdaeId], references: [id])
+  createdAt                  DateTime            @default(now())
 
   @@unique([tipoDocumento, documento])
 }
 
-model DatosValidacionCargo {
-  id                            String             @id @default(auto()) @map("_id") @db.ObjectId
-  datosUdaeId                   String             @unique @db.ObjectId
-  datosUdae                     DatosUdae          @relation(fields: [datosUdaeId], references: [id])
-  userId                        String             @db.ObjectId
-  user                          User               @relation(fields: [userId], references: [id])
-  observacionesDespacho         String             @default("") // Observaciones del nombre del despacho, cargo y grado
-  observacionesClasificacion    String             @default("") // Obsevaciones de clasificacion, provisión del cargo y profesión
-  cargoExiste                   String             @default("") // Si, No, Si con novedad de traslado o supresión (requerir observacionesNovedad)
-  tipoNovedad                   String             @default("") // Traslado o supresión
-  tipoTraslado                  String             @default("") // Transitorio o permanente
-  jurisdiccionTraslado          String             @default("") // ADMINISTRATIVA, AGRARIO Y RURAL, CONTENCIOSO ADMINISTRATIVO, DISCIPLINARIA, ORDINARIA 
-  distritoDestinoTraslado       String             @default("")
-  circuitoDestinoTraslado       String             @default("")
-  municipioDestinoTraslado      String             @default("")
-  despachoDestinoTraslado       String             @default("")
-  codigoDespachoDestinoTraslado String             @default("")
-  actoAdministrativoId          String             @db.ObjectId
-  actoAdministrativo            ActoAdministrativo @relation(fields: [actoAdministrativoId], references: [id])
-  observacionesNovedad          String             @default("") // Observaciones de la novedad (traslado o supresión)
-}
-
 model Despacho {
-  id        String @id @default(auto()) @map("_id") @db.ObjectId
-  nombre    String @unique
-  codigo    String @unique
-  municipio String
-  email     String @unique
+  id                         String          @id @default(auto()) @map("_id") @db.ObjectId
+  nombre                     String          @unique
+  codigo                     String          @unique
+  municipio                  String
+  email                      String          @unique
+  // jurisdiccion
+  // distrito
+  // circuito
+  // municipio
+  trasladosDeCargoReportados DatosEncuesta[]
 }

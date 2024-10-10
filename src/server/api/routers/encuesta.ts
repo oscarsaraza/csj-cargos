@@ -29,6 +29,14 @@ const servidorProvisionalidadSchema = z.object({
 
 const saveEncuestaSchema = z.object({
   datosUdaeId: z.string(),
+  cargoExiste: z.enum(['Si', 'No', 'Si con novedad']),
+  tipoNovedad: z.string(),
+  tipoTraslado: z.string(),
+  despachoTrasladoDestinoId: z.string().optional(),
+  actoTrasladoId: z.string().optional(),
+  observacionesNovedad: z.string(),
+  observacionesDespacho: z.string(),
+  observacionesClasificacion: z.string(),
   tieneServidorProp: z.boolean(),
   servidorPropiedad: servidorPropiedadSchema.nullable(),
   tieneServidorProv: z.boolean(),
@@ -101,28 +109,26 @@ export const encuestaRouter = createTRPCRouter({
   }),
 
   save: protectedProcedure.input(saveEncuestaSchema).mutation(async ({ ctx, input }) => {
-    const { datosUdaeId, ...data } = input
-    const tieneServidorProv = data.tieneServidorProv ? 'Si' : 'No'
-    const familiaresDependientes = parseInt(data.servidorPropiedad?.familiaresDependientes || '0')
-    const familiaresDependientesProv = parseInt(data.servidorProvisionalidad?.familiaresDependientesProv || '0')
+    const { datosUdaeId, servidorPropiedad, servidorProvisionalidad, ...data } = input
 
-    return ctx.db.datosEncuesta.upsert({
-      where: { datosUdaeId },
-      create: {
-        datosUdaeId,
-        ...data.servidorPropiedad,
-        ...data.servidorProvisionalidad,
-        tieneServidorProv,
-        familiaresDependientes,
-        familiaresDependientesProv,
-      },
-      update: {
-        ...data.servidorPropiedad,
-        ...data.servidorProvisionalidad,
-        tieneServidorProv,
-        familiaresDependientes,
-        familiaresDependientesProv,
-      },
-    })
+    const tieneServidorProp = data.tieneServidorProp ? 'Si' : 'No'
+    const tieneServidorProv = data.tieneServidorProv ? 'Si' : 'No'
+    const familiaresDependientes = parseInt(servidorPropiedad?.familiaresDependientes || '0')
+    const familiaresDependientesProv = parseInt(servidorProvisionalidad?.familiaresDependientesProv || '0')
+
+    const encuesta = {
+      ...data,
+      ...servidorPropiedad,
+      ...servidorProvisionalidad,
+      tieneServidorProp,
+      tieneServidorProv,
+      familiaresDependientes,
+      familiaresDependientesProv,
+    }
+
+    try {
+      await ctx.db.datosEncuesta.delete({ where: { datosUdaeId } })
+    } catch (error) {}
+    return ctx.db.datosEncuesta.create({ data: { datosUdaeId, ...encuesta } })
   }),
 })

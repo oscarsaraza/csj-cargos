@@ -4,6 +4,7 @@ import { cargosRouter } from './routers/cargos'
 import { encuestaRouter } from './routers/encuesta'
 import { enlaceActosRouter } from './routers/enlaceActos'
 import { usersRouter } from './routers/users'
+import { despachosRouter } from './routers/despachos'
 
 /**
  * This is the primary router for your server.
@@ -12,6 +13,7 @@ import { usersRouter } from './routers/users'
  */
 export const appRouter = createTRPCRouter({
   actos: actosRouter,
+  despachos: despachosRouter,
   encuestas: encuestaRouter,
   enlaceActos: enlaceActosRouter,
   cargos: cargosRouter,
