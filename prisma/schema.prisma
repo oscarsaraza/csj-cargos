@@ -242,4 +242,5 @@ model Despacho {
   // circuito
   // municipio
   trasladosDeCargoReportados DatosEncuesta[]
+  observacionesListadoCargos String?
 }
