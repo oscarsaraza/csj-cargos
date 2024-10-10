@@ -218,7 +218,7 @@ model DatosEncuesta {
   tipoNovedad                String              @default("") // Traslado o supresión
   tipoTraslado               String              @default("") // Transitorio o permanente
   despachoTrasladoDestinoId  String?             @db.ObjectId
-  despacho                   Despacho?           @relation(fields: [despachoTrasladoDestinoId], references: [id])
+  despachoTrasladoDestino    Despacho?           @relation(fields: [despachoTrasladoDestinoId], references: [id])
   actoTrasladoId             String?             @db.ObjectId
   actoTraslado               ActoAdministrativo? @relation(fields: [actoTrasladoId], references: [id])
   observacionesNovedad       String              @default("") // Observaciones de la novedad (traslado o supresión)

@@ -10,9 +10,7 @@ import { ActoForm } from './acto-form'
 export default async function Consolidado() {
   const { actos, columns } = await api.actos.getList()
 
-  const filteredColumns = columns.filter(
-    (column) => column.name !== 'id' && column.name !== 'enlacesUdae' && column.name !== 'datosValidacionCargo',
-  )
+  const filteredColumns = columns.filter((column) => column.name !== 'id' && column.name !== 'enlacesUdae')
 
   const { userId } = await api.users.getLoggedUser()
   if (!userId) redirect('/login')

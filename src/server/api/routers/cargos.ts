@@ -107,8 +107,7 @@ export const cargosRouter = createTRPCRouter({
         enlaceCsj: { include: { datosCsj: true } },
         enlaceDeaj: { include: { datosDeaj: true } },
         datosActoAdministrativo: { include: { actoAdministrativo: true } },
-        datosEncuesta: true,
-        datosValidacion: { include: { actoAdministrativo: true } },
+        datosEncuesta: { include: { actoTraslado: true, despachoTrasladoDestino: true } },
       },
       orderBy: [{ numero: 'asc' }],
     })
@@ -158,7 +157,7 @@ export const cargosRouter = createTRPCRouter({
       { modelName: 'DatosCsj', name: '', type: 'string', prettyName: 'Sección (División o grupo)' },
       { modelName: 'DatosCsj', name: 'codigoDespacho', type: 'string', prettyName: 'Código del despacho' },
       {
-        modelName: 'DatosValidacion',
+        modelName: 'DatosEncuesta',
         name: 'cargoExiste',
         type: 'string',
         prettyName: '¿El cargo existe en este despacho?',
@@ -197,7 +196,7 @@ export const cargosRouter = createTRPCRouter({
       { modelName: 'DatosActo', name: 'numeral', type: 'string', prettyName: 'Numeral correcto' },
 
       {
-        modelName: 'DatosValidacion',
+        modelName: 'DatosEncuesta',
         name: 'observacionesDespacho',
         type: 'string',
         prettyName: 'Observaciones del nombre del despacho, cargo y grado',
@@ -317,87 +316,80 @@ export const cargosRouter = createTRPCRouter({
         prettyName: 'Profesión 3 (Profesión adicional)',
       },
       {
-        modelName: 'DatosValidacion',
+        modelName: 'DatosEncuesta',
         name: 'observacionesClasificacion',
         type: 'string',
         prettyName: 'Observaciones del nombre del despacho, cargo y grado',
       },
 
       {
-        modelName: 'DatosValidacion',
-        name: 'observacionesClasificacion',
-        type: 'string',
-        prettyName: 'Observaciones del nombre del despacho, cargo y grado',
-      },
-
-      {
-        modelName: 'DatosValidacion',
+        modelName: 'DatosEncuesta',
         name: 'tipoNovedad',
         type: 'string',
         prettyName: 'Tipo de novedad',
       },
       {
-        modelName: 'DatosValidacion',
+        modelName: 'DatosEncuesta',
         name: 'tipoTraslado',
         type: 'string',
         prettyName: 'Tipo de traslado',
       },
       {
-        modelName: 'DatosValidacion',
+        modelName: 'DespachoDatosEncuesta',
         name: 'jurisdiccionTraslado',
         type: 'string',
         prettyName: 'Jurisdicción de destino',
       },
       {
-        modelName: 'DatosValidacion',
+        modelName: 'DespachoDatosEncuesta',
         name: 'distritoDestinoTraslado',
         type: 'string',
         prettyName: 'Distrito de destino',
       },
       {
-        modelName: 'DatosValidacion',
+        modelName: 'DespachoDatosEncuesta',
         name: 'circuitoDestinoTraslado',
         type: 'string',
         prettyName: 'Circuito de destino',
       },
       {
-        modelName: 'DatosValidacion',
+        modelName: 'DespachoDatosEncuesta',
         name: 'municipioDestinoTraslado',
         type: 'string',
         prettyName: 'Municipio de destino',
       },
       {
-        modelName: 'DatosValidacion',
+        modelName: 'DespachoDatosEncuesta',
         name: 'despachoDestinoTraslado',
         type: 'string',
         prettyName: 'Despacho de destino',
       },
       {
-        modelName: 'DatosValidacion',
+        modelName: 'DespachoDatosEncuesta',
         name: 'codigoDespachoDestinoTraslado',
         type: 'string',
         prettyName: 'Código de despacho de destino',
       },
       {
-        modelName: 'ActoDatosValidacion',
+        modelName: 'ActoDatosEncuesta',
         name: 'tipo',
         type: 'string',
         prettyName: 'Tipo de acto administrativo (Traslado o supresión)',
       },
       {
-        modelName: 'ActoDatosValidacion',
+        modelName: 'ActoDatosEncuesta',
         name: 'numero',
         type: 'string',
         prettyName: 'Número de acto administrativo (Traslado o supresión)',
       },
       {
-        modelName: 'ActoDatosValidacion',
+        modelName: 'ActoDatosEncuesta',
         name: 'anio',
         type: 'string',
         prettyName: 'Año de acto administrativo (Traslado o supresión)',
       },
       {
-        modelName: 'DatosValidacion',
+        modelName: 'DatosEncuesta',
         name: 'observacionesNovedad',
         type: 'string',
         prettyName: 'Observaciones de la novedad (Traslado o supresión)',
@@ -438,7 +430,8 @@ export const cargosRouter = createTRPCRouter({
           else if (modelName === 'ActoAdministrativo') fila = item.datosActoAdministrativo?.actoAdministrativo || {}
           else if (modelName === 'DatosActo') fila = item.datosActoAdministrativo || {}
           else if (modelName === 'DatosEncuesta') fila = item.datosEncuesta || {}
-          else if (modelName === 'DatosValidacion') fila = item.datosValidacion || {}
+          else if (modelName === 'ActoDatosEncuesta') fila = item.datosEncuesta?.actoTraslado || {}
+          else if (modelName === 'DespachoDatosEncuesta') fila = item.datosEncuesta?.despachoTrasladoDestino || {}
 
           const value = fila?.[name] ? String(fila[name]) : ''
           return { name: `${modelName}.${name}`, type, prettyName, value }

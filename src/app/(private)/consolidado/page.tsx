@@ -12,7 +12,6 @@ const bgBymodelName: Record<string, string> = {
   ActoAdministrativo: 'bg-pink-50',
   DatosActo: 'bg-pink-50',
   DatosEncuesta: 'bg-lime-50',
-  DatosValidacion: 'bg-lime-100',
 }
 
 export default async function Consolidado() {
