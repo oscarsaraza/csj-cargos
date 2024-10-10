@@ -108,6 +108,11 @@ export function EncuestaServidorForm({ datosUdaeId, data, defaults }: EncuestaSe
             {data.descripcionCargo} {data.gradoCargo}
           </CardTitle>
           <div className="text-center font-bold text-muted-foreground">{data.nombreDespacho}</div>
+          {data.numeroActoAdministrativo && data.anioActoAdministrativo && data.tipoActoAdministrativo && (
+            <div className="text-center font-bold text-muted-foreground">
+              {data.tipoActoAdministrativo} {data.numeroActoAdministrativo}-{data.anioActoAdministrativo}
+            </div>
+          )}
         </CardHeader>
         <CardContent className="flex flex-row flex-wrap items-start justify-around gap-8">
           <div className="grid w-full gap-4 py-4 lg:w-5/12">
