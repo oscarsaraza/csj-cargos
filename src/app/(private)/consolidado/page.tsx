@@ -16,8 +16,6 @@ const bgBymodelName: Record<string, string> = {
 }
 
 export default async function Consolidado() {
-  const { columns, registros, datosAvance } = await api.cargos.getConsolidado()
-
   const { userId } = await api.users.getLoggedUser()
   if (!userId) redirect('/login')
 
@@ -27,48 +25,14 @@ export default async function Consolidado() {
   if (user.role !== 'csj' && user.role !== 'deaj')
     return <UnauthorizedUserMessage email={`${user.username}@cendoj.ramajudicial.gov.co`} />
 
+  const datosAvance = await api.cargos.getDatosAvance()
+
   return (
     <div className="w-full max-w-full space-y-4">
-      <h1>Consolidado ({registros.length} registros)</h1>
-
+      <h1 className="text-2xl font-bold">Consolidado</h1>
       <DescargaXlsxButton />
 
-      <div className="mx-auto max-w-full rounded-lg border">
-        <div className="max-h-[640px] overflow-auto">
-          <table className="w-full border-collapse">
-            <thead className="sticky top-0 z-10 bg-background">
-              <tr>
-                {columns.map(({ name, prettyName }) => (
-                  <th key={name} className="border-b text-center font-normal leading-none text-muted-foreground">
-                    {prettyName}
-                  </th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {registros.map((fila) => (
-                <tr key={fila.id?.value} className="hover:bg-muted/50">
-                  {columns.map(({ modelName, name }) => {
-                    const columnName = `${modelName}.${name}`
-                    return (
-                      <td
-                        key={columnName}
-                        className={cn(
-                          'min-w-40 max-w-lg truncate text-nowrap border-b text-center',
-                          bgBymodelName[modelName],
-                        )}
-                      >
-                        {fila[columnName]?.value}
-                      </td>
-                    )
-                  })}
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
+      <h1 className="text-2xl font-bold">Avance</h1>
       <div className="flex flex-row flex-wrap gap-4">
         <ProgressCard
           title="Emparejamiento CSJ"
