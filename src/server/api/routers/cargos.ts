@@ -54,7 +54,7 @@ export const cargosRouter = createTRPCRouter({
 
     const datosDeaj = await ctx.db.datosDeaj.findMany({
       where: { enlace: null },
-      orderBy: [{ ciudadUbicacionLaboral: 'asc' }, { cargoTitular: 'asc' }, { dependenciaTitular: 'asc' }],
+      orderBy: [{ ciudadUbicacionLaboral: 'asc' }, { dependenciaTitular: 'asc' }, { cargoTitular: 'asc' }],
     })
     const columnsDeaj = modelDeaj ? orderTableColumns(getModelColumns(modelDeaj), deajColumnsOrder) : []
 
