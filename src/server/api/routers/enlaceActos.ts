@@ -59,6 +59,13 @@ export const enlaceActosRouter = createTRPCRouter({
         where: { id: input.datosUdaeId },
         select: {
           id: true,
+
+          circuitoJudicial: true,
+          municipioSedeFisica: true,
+          nombreDespacho: true,
+          descripcionCargo: true,
+          gradoCargo: true,
+
           tipoActoAdministrativo: true,
           anioActoAdministrativo: true,
           numeroActoAdministrativo: true,

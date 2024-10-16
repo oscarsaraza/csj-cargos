@@ -4,7 +4,7 @@ import { ActoAdministrativo } from '@prisma/client'
 import { FileIcon } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Button } from '~/components/ui/button'
 import {
   Dialog,
@@ -28,10 +28,31 @@ type ActoFormProps = {
 
 export function EnlaceActoForm({ datosUdaeId, actosAdministrativosList }: ActoFormProps) {
   const [open, setOpen] = useState(false)
-  const [actoId, setActoId] = useState<string | undefined>(undefined)
   const router = useRouter()
 
-  const { data: datosEnlace, refetch } = api.enlaceActos.datosFormularioEdicion.useQuery({ datosUdaeId })
+  const { data: datosEnlace, refetch } = api.enlaceActos.datosFormularioEdicion.useQuery(
+    { datosUdaeId },
+    { enabled: !!datosUdaeId && open },
+  )
+
+  const [actoId, setActoId] = useState<string | undefined>()
+  const [acto, setActo] = useState<ActoAdministrativo | undefined>(
+    actosAdministrativosList.find((acto) => acto.id === actoId),
+  )
+
+  useEffect(() => {
+    const actoSugerido = actosAdministrativosList.find(
+      (acto) =>
+        acto.anio === datosEnlace?.anioActoAdministrativo?.toString() &&
+        acto.numero === datosEnlace?.numeroActoAdministrativo,
+    )
+    const defaultActoAdministrativoId = datosEnlace?.datosActoAdministrativo?.actoAdministrativoId || actoSugerido?.id
+    setActoId(defaultActoAdministrativoId)
+  }, [datosEnlace])
+
+  useEffect(() => {
+    setActo(actosAdministrativosList.find((acto) => acto.id === actoId))
+  }, [datosEnlace, actoId, actosAdministrativosList])
 
   const utils = api.useUtils()
   const onSuccess = () => {
@@ -64,13 +85,6 @@ export function EnlaceActoForm({ datosUdaeId, actosAdministrativosList }: ActoFo
   }
 
   const title = `${datosEnlace?.datosActoAdministrativo?.id ? 'Editar' : 'Registrar'}`
-  const actoSugerido = actosAdministrativosList.find(
-    (acto) =>
-      acto.anio === datosEnlace?.anioActoAdministrativo?.toString() &&
-      acto.numero === datosEnlace?.numeroActoAdministrativo,
-  )
-  const defaultActoAdministrativoId = datosEnlace?.datosActoAdministrativo?.actoAdministrativoId || actoSugerido?.id
-  const acto = actosAdministrativosList.find((acto) => acto.id === actoId)
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -82,6 +96,32 @@ export function EnlaceActoForm({ datosUdaeId, actosAdministrativosList }: ActoFo
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>Información de acto administrativo de creación del cargo</DialogDescription>
         </DialogHeader>
+
+        <div>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Circuito</Label>
+              <Label className="col-span-3 text-muted-foreground">{datosEnlace?.circuitoJudicial}</Label>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Municipio</Label>
+              <Label className="col-span-3 text-muted-foreground">{datosEnlace?.municipioSedeFisica}</Label>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Despacho</Label>
+              <Label className="col-span-3 text-muted-foreground">{datosEnlace?.nombreDespacho}</Label>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Cargo</Label>
+              <Label className="col-span-3 text-muted-foreground">{datosEnlace?.descripcionCargo}</Label>
+            </div>
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right">Grado</Label>
+              <Label className="col-span-3 text-muted-foreground">{datosEnlace?.gradoCargo}</Label>
+            </div>
+          </div>
+        </div>
+
         <form onSubmit={onSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid grid-cols-4 items-center gap-4">
@@ -89,13 +129,7 @@ export function EnlaceActoForm({ datosUdaeId, actosAdministrativosList }: ActoFo
                 Acto
               </Label>
               <div className="col-span-3 flex w-full flex-row items-center gap-2">
-                <Select
-                  name="actoAdministrativoId"
-                  defaultValue={defaultActoAdministrativoId}
-                  onValueChange={setActoId}
-                  value={actoId}
-                  required
-                >
+                <Select name="actoAdministrativoId" onValueChange={setActoId} value={actoId} required>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Seleccione el acto administrativo" />
                   </SelectTrigger>
@@ -108,11 +142,7 @@ export function EnlaceActoForm({ datosUdaeId, actosAdministrativosList }: ActoFo
                   </SelectContent>
                 </Select>
 
-                {acto?.enlace && (
-                  <Link href={acto.enlace} target="_blank" rel="noopener noreferrer">
-                    <FileIcon className="m-2 h-4 w-4" />
-                  </Link>
-                )}
+                <EnlaceActoButton enlace={acto?.enlace} />
               </div>
             </div>
 
@@ -181,5 +211,15 @@ export function EnlaceActoForm({ datosUdaeId, actosAdministrativosList }: ActoFo
         </form>
       </DialogContent>
     </Dialog>
+  )
+}
+
+function EnlaceActoButton({ enlace }: { enlace?: string }) {
+  if (!enlace) return null
+
+  return (
+    <Link href={enlace} target="_blank" rel="noopener noreferrer">
+      <FileIcon className="m-2 h-4 w-4" />
+    </Link>
   )
 }
