@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Progress } from '~/components/ui/progress'
 import { cn } from '~/lib/utils'
 import { api } from '~/trpc/server'
+import { DescargaXlsxButton } from './descarga-xlsx-button'
 
 const bgBymodelName: Record<string, string> = {
   DatosUdae: 'bg-sky-50',
@@ -29,6 +30,8 @@ export default async function Consolidado() {
   return (
     <div className="w-full max-w-full space-y-4">
       <h1>Consolidado ({registros.length} registros)</h1>
+
+      <DescargaXlsxButton />
 
       <div className="mx-auto max-w-full rounded-lg border">
         <div className="max-h-[640px] overflow-auto">
