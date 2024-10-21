@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { useFormState } from 'react-dom'
@@ -57,7 +58,7 @@ function RequestLogin({
   onSubmit: (e: React.FormEvent) => void
 }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-gray-100">
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-center text-2xl font-bold">Inicio de sesión</CardTitle>
@@ -89,6 +90,15 @@ function RequestLogin({
           </CardFooter>
         </form>
       </Card>
+
+      <p className="max-w-md text-muted-foreground">
+        Para el diligenciamiento de la encuesta de servidores judiciales, se requiere iniciar sesión con el correo
+        asignado para cada despacho. Puede verificar el correo electrónico registrado para cada despacho en el siguiente
+        enlace.
+      </p>
+      <Link href="/directorio" target="_blank" rel="noopener noreferrer">
+        <Button variant="link">Directorio de despachos</Button>
+      </Link>
     </div>
   )
 }

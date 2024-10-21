@@ -17,12 +17,17 @@ const links = [
   { href: '/actualizacion', label: 'Actualización de datos', roles: ['office'] },
 ]
 
-const HeaderLink = ({ href, label }: { href: string; label: string }) => {
+const HeaderLink = ({ href, label, target, rel }: { href: string; label: string; target?: string; rel?: string }) => {
   const pathname = usePathname()
   const isLinkActive = (href: string) => pathname === href
 
   return (
-    <Link href={href} className={cn('text-xl text-slate-900', { 'font-bold underline': isLinkActive(href) })}>
+    <Link
+      href={href}
+      className={cn('text-xl text-slate-900', { 'font-bold underline': isLinkActive(href) })}
+      target={target}
+      rel={rel}
+    >
       {label}
     </Link>
   )
@@ -55,6 +60,8 @@ export function Header({ username, role }: { username: string; role: UserRole })
           return <HeaderLink key={link.href} href={link.href} label={link.label} />
         }
       })}
+
+      <HeaderLink href="/directorio" label="Despachos" target="_blank" rel="noopener noreferrer" />
 
       <div className="grow"></div>
 
