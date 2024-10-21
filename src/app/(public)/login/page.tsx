@@ -99,6 +99,13 @@ function RequestLogin({
       <Link href="/directorio" target="_blank" rel="noopener noreferrer">
         <Button variant="link">Directorio de despachos</Button>
       </Link>
+      <Link
+        href="https://archivos.cargos.csbc.app/Gu%C3%ADa%20de%20diligenciamiento%20de%20encuesta%20a%20servidores%20judiciales%202024.pdf"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <Button variant="link">Guía de diligenciamiento de la encuesta a servidores</Button>
+      </Link>
     </div>
   )
 }
