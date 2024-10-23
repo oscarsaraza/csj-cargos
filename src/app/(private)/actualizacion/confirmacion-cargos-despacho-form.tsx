@@ -40,7 +40,7 @@ export function ConfirmacionCargosDespachoForm({ despacho }: ConfirmacionCargosD
         />
 
         <Label htmlFor="cargosNoCoinciden">
-          Los cargos del despacho <span className="font-bold">NO</span> coinciden con los cargos del listado?
+          Los cargos del despacho <span className="font-bold">NO</span> coinciden con los cargos del listado anterior?
         </Label>
       </div>
 

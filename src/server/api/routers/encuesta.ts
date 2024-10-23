@@ -46,17 +46,20 @@ const saveEncuestaSchema = z.object({
 export const encuestaRouter = createTRPCRouter({
   listaCargosDespacho: protectedProcedure.query(async ({ ctx, input }) => {
     const email = `${ctx.user.username}@cendoj.ramajudicial.gov.co`
-    const despacho = await ctx.db.despacho.findFirst({ where: { email } })
+    const despachos = await ctx.db.despacho.findMany({ where: { email } })
 
-    if (!despacho)
+    if (!despachos.length)
       throw new TRPCError({
         code: 'NOT_FOUND',
         message: 'No se encontró ningun despacho asociado a esta cuenta de usuario.',
       })
 
+    const codigos = despachos.map((despacho) => despacho.codigo)
+    const nombres = despachos.map((despacho) => despacho.nombre)
+
     const cargosDespacho = await ctx.db.datosUdae.findMany({
       where: {
-        OR: [{ enlaceCsj: { datosCsj: { codigoDespacho: despacho.codigo } } }, { nombreDespacho: despacho.nombre }],
+        OR: [{ enlaceCsj: { datosCsj: { codigoDespacho: { in: codigos } } } }, { nombreDespacho: { in: nombres } }],
       },
       select: { id: true, descripcionCargo: true, datosEncuesta: { select: { id: true } } },
       orderBy: { descripcionCargo: 'asc' },

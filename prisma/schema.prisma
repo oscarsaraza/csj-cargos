@@ -236,7 +236,7 @@ model Despacho {
   nombre                     String          @unique
   codigo                     String          @unique
   municipio                  String
-  email                      String          @unique
+  email                      String
   // jurisdiccion
   // distrito
   // circuito
