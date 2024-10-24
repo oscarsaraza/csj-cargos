@@ -44,20 +44,21 @@ const passwordHashOptions = {
 
 export const requestLoginCode = async (
   username: string,
-): Promise<{ success: true; username: string } | { success: false; message: string }> => {
-  if (typeof username !== 'string' || username.length < 3 || username.length > 31 || !/^[a-z0-9]+$/.test(username))
+  domain: string,
+): Promise<{ success: true; username: string; domain: string } | { success: false; message: string }> => {
+  if (typeof username !== 'string' || username.length < 3 || username.length > 45 || !/^[a-z0-9]+$/.test(username))
     return { success: false, message: 'Nombre de usuario no válido' }
 
   const password = Math.floor(100000 + Math.random() * 900000).toString()
   const passwordHash = await hash(password, passwordHashOptions)
 
-  const to = `${username}@cendoj.ramajudicial.gov.co`
+  const to = `${username}${domain}`
   const html = `
 <h1>Inicio de sesión</h1>
 <p>Consolidación de cargos - UDAE</p>
 <p>Seccional Boyacá y Casanare</p>
 <hr/>
-<p>Usuario: ${username}@cendoj.ramajudicial.gov.co</p>
+<p>Usuario: ${username}${domain}</p>
 <p>Código: ${password}</p>`
   const sentEmailId = await sendEmail({ subject: 'Inicio de sesión', to, html })
   if (!sentEmailId) return { success: false, message: 'Error al enviar correo electrónico con el código de acceso.' }
@@ -78,7 +79,7 @@ export const requestLoginCode = async (
     })
   else await db.user.update({ where: { id: user.id }, data: { password: passwordHash, passwordExpiresAt } })
 
-  return { success: true, username }
+  return { success: true, username, domain }
 }
 
 export const loginWithCode = async (

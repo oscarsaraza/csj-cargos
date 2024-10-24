@@ -44,9 +44,15 @@ const saveEncuestaSchema = z.object({
 })
 
 export const encuestaRouter = createTRPCRouter({
-  listaCargosDespacho: protectedProcedure.query(async ({ ctx, input }) => {
-    const email = `${ctx.user.username}@cendoj.ramajudicial.gov.co`
-    const despachos = await ctx.db.despacho.findMany({ where: { email } })
+  listaCargosDespacho: protectedProcedure.query(async ({ ctx }) => {
+    const despachos = await ctx.db.despacho.findMany({
+      where: {
+        OR: [
+          { email: `${ctx.user.username}@cendoj.ramajudicial.gov.co` },
+          { email: `${ctx.user.username}@cndj.gov.co` },
+        ],
+      },
+    })
 
     if (!despachos.length)
       throw new TRPCError({

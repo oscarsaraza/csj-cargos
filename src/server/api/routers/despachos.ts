@@ -8,8 +8,14 @@ export const despachosRouter = createTRPCRouter({
 
   byUsuarioId: protectedProcedure.input(z.object({ usuarioId: z.string() })).query(async ({ ctx, input }) => {
     const usuario = await ctx.db.user.findUnique({ where: { id: input.usuarioId } })
-    const email = `${usuario?.username}@cendoj.ramajudicial.gov.co`
-    const despacho = await ctx.db.despacho.findFirst({ where: { email } })
+    const despacho = await ctx.db.despacho.findFirst({
+      where: {
+        OR: [
+          { email: `${usuario?.username}@cendoj.ramajudicial.gov.co` },
+          { email: `${usuario?.username}@cndj.gov.co` },
+        ],
+      },
+    })
     return despacho
   }),
 

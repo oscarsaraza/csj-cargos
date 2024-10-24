@@ -10,8 +10,12 @@ export function UnauthorizedUserMessage({ email }: { email: string }) {
         </CardHeader>
         <CardContent>
           <p className="text-center text-sm">
-            La dirección de correo electrónico <span className="font-bold">{email}</span> no se encuentra configurada
-            para acceder a esta sección.
+            La cuenta del usuario <span className="font-bold">{email}</span> no se encuentra configurada para acceder a
+            esta sección.
+          </p>
+          <p className="text-center text-sm">
+            Para acceder al diligenciamiento de la encuesta a servidores, recuerde que se debe usar la cuenta del
+            despacho.
           </p>
         </CardContent>
       </Card>

@@ -6,16 +6,21 @@ import { loginWithCode, logout, requestLoginCode } from '~/lib/auth'
 
 const requestLoginSchema = z.object({
   username: z.string(),
+  domain: z.string(),
 })
 
 export const requestLoginAction = async (prevState: unknown, formData: FormData) => {
   const { success, data, error } = requestLoginSchema.safeParse(Object.fromEntries(formData))
   if (!success) throw new Error(error.message)
 
-  const result = await requestLoginCode(data.username)
+  const username = data.username.toLowerCase().trim()
+
+  const result = await requestLoginCode(username, data.domain)
   if (!result.success) throw new Error(result.message)
 
-  return { username: result.username }
+  console.log('Inicio de sesión:', username, data.domain)
+
+  return { username, domain: data.domain }
 }
 
 const loginWithCodeSchema = z.object({

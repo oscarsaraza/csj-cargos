@@ -2,7 +2,7 @@
 
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useEffect, useReducer, useState } from 'react'
 import { useFormState } from 'react-dom'
 import { Button } from '~/components/ui/button'
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '~/components/ui/card'
@@ -16,8 +16,12 @@ export default function Page() {
   const [code, setCode] = useState('')
   const [loginRequested, setLoginRequested] = useState(false)
   const router = useRouter()
+  const [selectedDomain, toggleDomain] = useReducer(
+    (value) => (value === '@cendoj.ramajudicial.gov.co' ? '@cndj.gov.co' : '@cendoj.ramajudicial.gov.co'),
+    '@cendoj.ramajudicial.gov.co',
+  )
 
-  const [requestStateLogin, requestLogin] = useFormState(requestLoginAction, { username })
+  const [requestStateLogin, requestLogin] = useFormState(requestLoginAction, { username, domain: selectedDomain })
   const [loginWithCodeState, loginWithCode] = useFormState(loginWithCodeAction, { success: false })
 
   useEffect(() => {
@@ -32,6 +36,7 @@ export default function Page() {
     e.preventDefault()
     const formData = new FormData()
     formData.append('username', username)
+    formData.append('domain', selectedDomain)
     requestLogin(formData)
   }
 
@@ -44,18 +49,38 @@ export default function Page() {
   }
 
   if (!loginRequested)
-    return <RequestLogin username={username} setUsername={setUsername} onSubmit={onRequestLoginSubmit} />
-  return <LoginWithCode username={username} code={code} setCode={setCode} onSubmit={onLoginWithCodeSubmit} />
+    return (
+      <RequestLogin
+        username={username}
+        setUsername={setUsername}
+        domain={selectedDomain}
+        toggleDomain={toggleDomain}
+        onSubmit={onRequestLoginSubmit}
+      />
+    )
+  return (
+    <LoginWithCode
+      username={username}
+      code={code}
+      setCode={setCode}
+      domain={selectedDomain}
+      onSubmit={onLoginWithCodeSubmit}
+    />
+  )
 }
 
 function RequestLogin({
   username,
   setUsername,
   onSubmit,
+  domain,
+  toggleDomain,
 }: {
   username: string
   setUsername: (username: string) => void
   onSubmit: (e: React.FormEvent) => void
+  domain: string
+  toggleDomain: () => void
 }) {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-gray-100">
@@ -78,7 +103,16 @@ function RequestLogin({
                     onChange={(e) => setUsername(e.target.value)}
                     required
                   />
-                  <span>@cendoj.ramajudicial.gov.co</span>
+                  <Input name="domain" type="hidden" value={domain} />
+                  <Button
+                    variant="outline"
+                    onClick={(e) => {
+                      e.preventDefault()
+                      toggleDomain()
+                    }}
+                  >
+                    {domain}
+                  </Button>
                 </div>
               </div>
             </div>
@@ -92,9 +126,9 @@ function RequestLogin({
       </Card>
 
       <p className="max-w-md text-muted-foreground">
-        Para el diligenciamiento de la encuesta de servidores judiciales, se requiere iniciar sesión <span className='text-red-800'>con el correo
-        asignado para cada despacho</span>. Puede verificar el correo electrónico registrado para cada despacho en el siguiente
-        enlace.
+        Para el diligenciamiento de la encuesta de servidores judiciales, se requiere iniciar sesión{' '}
+        <span className="text-red-800">con el correo asignado para cada despacho</span>. Puede verificar el correo
+        electrónico registrado para cada despacho en el siguiente enlace.
       </p>
       <Link href="/directorio" target="_blank" rel="noopener noreferrer">
         <Button variant="link">Directorio de despachos</Button>
@@ -115,11 +149,13 @@ function LoginWithCode({
   code,
   setCode,
   onSubmit,
+  domain,
 }: {
   username: string
   code: string
   setCode: (code: string) => void
   onSubmit: (e: React.FormEvent) => void
+  domain: string
 }) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100">
@@ -134,7 +170,7 @@ function LoginWithCode({
               <div className="space-y-2">
                 <Label htmlFor="username">Nombre de usuario</Label>
                 <div className="flex flex-row items-center gap-2">
-                  <Input type="text" value={`${username}@cendoj.ramajudicial.gov.co`} disabled />
+                  <Input type="text" value={`${username}${domain}`} disabled />
                 </div>
               </div>
               <div className="space-y-2">

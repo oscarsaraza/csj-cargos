@@ -13,8 +13,7 @@ export default async function Home() {
 
   if (user.role === 'office') redirect('/actualizacion')
 
-  if (user.role !== 'csj' && user.role !== 'deaj')
-    return <UnauthorizedUserMessage email={`${user.username}@cendoj.ramajudicial.gov.co`} />
+  if (user.role !== 'csj' && user.role !== 'deaj') return <UnauthorizedUserMessage email={`${user.username}`} />
 
   return (
     <HydrateClient>

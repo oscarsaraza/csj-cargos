@@ -18,8 +18,7 @@ export default async function Consolidado() {
   const user = await api.users.byId({ userId })
   if (!user) redirect('/login')
 
-  if (user.role !== 'csj' && user.role !== 'deaj')
-    return <UnauthorizedUserMessage email={`${user.username}@cendoj.ramajudicial.gov.co`} />
+  if (user.role !== 'csj' && user.role !== 'deaj') return <UnauthorizedUserMessage email={`${user.username}`} />
 
   return (
     <div className="w-full max-w-lg space-y-4">

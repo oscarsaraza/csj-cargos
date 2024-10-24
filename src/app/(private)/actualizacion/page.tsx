@@ -14,7 +14,7 @@ export default async function ActualizacionPage() {
   const user = await api.users.byId({ userId })
   if (!user) redirect('/login')
 
-  if (user.role !== 'office') return <UnauthorizedUserMessage email={`${user.username}@cendoj.ramajudicial.gov.co`} />
+  if (user.role !== 'office') return <UnauthorizedUserMessage email={`${user.username}`} />
 
   const despacho = await api.despachos.byUsuarioId({ usuarioId: userId })
   const { cargosDespacho } = await api.encuestas.listaCargosDespacho()
