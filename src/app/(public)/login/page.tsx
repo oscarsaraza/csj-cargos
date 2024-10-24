@@ -92,8 +92,8 @@ function RequestLogin({
       </Card>
 
       <p className="max-w-md text-muted-foreground">
-        Para el diligenciamiento de la encuesta de servidores judiciales, se requiere iniciar sesión con el correo
-        asignado para cada despacho. Puede verificar el correo electrónico registrado para cada despacho en el siguiente
+        Para el diligenciamiento de la encuesta de servidores judiciales, se requiere iniciar sesión <span className='text-red-800'>con el correo
+        asignado para cada despacho</span>. Puede verificar el correo electrónico registrado para cada despacho en el siguiente
         enlace.
       </p>
       <Link href="/directorio" target="_blank" rel="noopener noreferrer">
