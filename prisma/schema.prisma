@@ -227,8 +227,6 @@ model DatosEncuesta {
   datosUdaeId                String              @unique @db.ObjectId
   datosUdae                  DatosUdae           @relation(fields: [datosUdaeId], references: [id])
   createdAt                  DateTime            @default(now())
-
-  @@unique([tipoDocumento, documento])
 }
 
 model Despacho {
