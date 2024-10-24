@@ -50,22 +50,33 @@ export default function Page() {
 
   if (!loginRequested)
     return (
-      <RequestLogin
-        username={username}
-        setUsername={setUsername}
-        domain={selectedDomain}
-        toggleDomain={toggleDomain}
-        onSubmit={onRequestLoginSubmit}
-      />
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-gray-100">
+        {requestStateLogin.success !== undefined && requestStateLogin.success === false ? (
+          <div className="font-bold text-red-500">{requestStateLogin.message}</div>
+        ) : null}
+        <RequestLogin
+          username={username}
+          setUsername={setUsername}
+          domain={selectedDomain}
+          toggleDomain={toggleDomain}
+          onSubmit={onRequestLoginSubmit}
+        />
+      </div>
     )
+
   return (
-    <LoginWithCode
-      username={username}
-      code={code}
-      setCode={setCode}
-      domain={selectedDomain}
-      onSubmit={onLoginWithCodeSubmit}
-    />
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-gray-100">
+      {loginWithCodeState.success !== undefined && loginWithCodeState.success === false ? (
+        <div className="font-bold text-red-500">{loginWithCodeState.message}</div>
+      ) : null}
+      <LoginWithCode
+        username={username}
+        code={code}
+        setCode={setCode}
+        domain={selectedDomain}
+        onSubmit={onLoginWithCodeSubmit}
+      />
+    </div>
   )
 }
 
@@ -83,7 +94,7 @@ function RequestLogin({
   toggleDomain: () => void
 }) {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-gray-100">
+    <>
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-center text-2xl font-bold">Inicio de sesión</CardTitle>
@@ -140,7 +151,7 @@ function RequestLogin({
       >
         <Button variant="link">Guía de diligenciamiento de la encuesta a servidores</Button>
       </Link>
-    </div>
+    </>
   )
 }
 
@@ -158,7 +169,7 @@ function LoginWithCode({
   domain: string
 }) {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100">
+    <>
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle className="text-center text-2xl font-bold">Inicio de sesión</CardTitle>
@@ -197,6 +208,6 @@ function LoginWithCode({
           </CardFooter>
         </form>
       </Card>
-    </div>
+    </>
   )
 }

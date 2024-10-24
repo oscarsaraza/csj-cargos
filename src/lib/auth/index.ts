@@ -61,7 +61,11 @@ export const requestLoginCode = async (
 <p>Usuario: ${username}${domain}</p>
 <p>Código: ${password}</p>`
   const sentEmailId = await sendEmail({ subject: 'Inicio de sesión', to, html })
-  if (!sentEmailId) return { success: false, message: 'Error al enviar correo electrónico con el código de acceso.' }
+  if (!sentEmailId)
+    return {
+      success: false,
+      message: 'Error al enviar correo electrónico con el código de acceso. Intente nuevamente en unos instantes.',
+    }
 
   const user = await db.user.findFirst({ where: { username } })
   const passwordExpiresAt = dayjs().add(10, 'minutes').toDate()
