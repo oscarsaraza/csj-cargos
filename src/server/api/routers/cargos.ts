@@ -62,7 +62,10 @@ export const cargosRouter = createTRPCRouter({
     return {
       datosUdae: datosUdae.map((fila) => ({
         ...fila,
-        nombreEncuesta: fila.datosEncuesta ? `${fila.datosEncuesta?.nombres} ${fila.datosEncuesta?.apellidos}` : '',
+        nombreEncuesta: fila.datosEncuesta
+          ? `${fila.datosEncuesta?.nombresProv} ${fila.datosEncuesta?.apellidosProv}`.trim() ||
+            `${fila.datosEncuesta?.nombres} ${fila.datosEncuesta?.apellidos}`.trim()
+          : '',
       })),
       columnsUdae,
       datosCsj,
