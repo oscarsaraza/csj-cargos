@@ -91,7 +91,8 @@ export const encuestaRouter = createTRPCRouter({
       },
     })
 
-    const tieneServidorEnProvisionalidad = data?.enlaceDeaj?.datosDeaj?.claseNombramiento === 'Provisionalidad'
+    const tieneServidorEnProvisionalidad =
+      !!data?.datosEncuesta?.tieneServidorProv || data?.enlaceDeaj?.datosDeaj?.claseNombramiento === 'Provisionalidad'
     const tieneServidorEnPropiedad =
       data?.enlaceCsj?.datosCsj.estadoActual === 'PROPIEDAD' ||
       data?.enlaceDeaj?.datosDeaj?.claseNombramiento === 'Propiedad'
@@ -103,7 +104,7 @@ export const encuestaRouter = createTRPCRouter({
     const documentoProv = data?.datosEncuesta?.documentoProv || data?.enlaceDeaj?.datosDeaj?.numDocumento || ''
     const { nombres: nombresProv, apellidos: apellidosProv } = tieneServidorEnProvisionalidad
       ? nombresEncuestaProv || separarNombre(data.enlaceDeaj?.datosDeaj?.servidor || '')
-      : {}
+      : { nombres: '', apellidos: '' }
 
     return {
       data,
