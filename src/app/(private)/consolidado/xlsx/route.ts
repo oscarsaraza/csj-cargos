@@ -16,7 +16,7 @@ export async function GET() {
       name: 'consolidado',
       data: [
         columns.map((col) => col.prettyName),
-        ...registros.map((registro) => columnKeys.map((col) => registro[col]?.value || '')),
+        ...registros.map((registro) => columnKeys.map((col) => registro[col]?.value ?? '')),
       ],
     },
   ]

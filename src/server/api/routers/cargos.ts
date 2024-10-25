@@ -237,9 +237,9 @@ export const cargosRouter = createTRPCRouter({
         type: 'string',
         prettyName: 'Año del acto administrativo correcto',
       },
-      { modelName: 'DatosActo', name: 'articulo', type: 'string', prettyName: 'Artículo correcto' },
-      { modelName: 'DatosActo', name: 'literal', type: 'string', prettyName: 'Literal correcto' },
-      { modelName: 'DatosActo', name: 'numeral', type: 'string', prettyName: 'Numeral correcto' },
+      { modelName: 'DatosActo', name: 'articuloCorrecto', type: 'string', prettyName: 'Artículo correcto' },
+      { modelName: 'DatosActo', name: 'literalCorrecto', type: 'string', prettyName: 'Literal correcto' },
+      { modelName: 'DatosActo', name: 'numeralCorrecto', type: 'string', prettyName: 'Numeral correcto' },
 
       {
         modelName: 'DatosEncuesta',
@@ -251,7 +251,7 @@ export const cargosRouter = createTRPCRouter({
       // En carrera, En periodo individual, En libre nombramiento
       {
         modelName: 'DatosDeaj',
-        name: 'claseNombramiento',
+        name: 'naturaleza',
         type: 'string',
         prettyName: 'Clasificación del empleo (Art. 130 Ley 270)',
       },
@@ -259,19 +259,19 @@ export const cargosRouter = createTRPCRouter({
       // En propiedad, En provisionalidad, En encargo, Cargo vacante
       {
         modelName: 'DatosDeaj',
-        name: '',
+        name: 'formaProvision',
         type: 'string',
         prettyName: 'Forma de provisión del cargo (Art. 132 Ley 270)',
       },
       {
-        modelName: 'DatosCsj',
-        name: 'propiedad',
+        modelName: 'DatosEncuesta',
+        name: 'nombres',
         type: 'string',
         prettyName: 'Nombres del servidor judicial en propiedad',
       },
       {
-        modelName: 'DatosCsj',
-        name: 'propiedadApellidos',
+        modelName: 'DatosEncuesta',
+        name: 'apellidos',
         type: 'string',
         prettyName: 'Apellidos del servidor judicial en propiedad',
       },
@@ -309,16 +309,14 @@ export const cargosRouter = createTRPCRouter({
         prettyName: 'Fecha en que finaliza la provisionalidad (DD/MM/AAAA)',
       },
       {
-        modelName: 'DatosDeaj',
-        name: 'servidor',
+        modelName: 'DatosEncuesta',
+        name: 'nombresProv',
         type: 'string',
         prettyName: 'Nombres del servidor judicial en provisionalidad',
       },
       {
-        // modelName: 'DatosEncuesta',
-        // name: 'apellidosProv',
-        modelName: 'DatosDeaj',
-        name: 'servidorApellidos',
+        modelName: 'DatosEncuesta',
+        name: 'apellidosProv',
         type: 'string',
         prettyName: 'Apellidos del servidor judicial en provisionalidad',
       },
@@ -459,7 +457,7 @@ export const cargosRouter = createTRPCRouter({
           else if (modelName === 'ActoDatosEncuesta') fila = item.datosEncuesta?.actoTraslado || {}
           else if (modelName === 'DespachoDatosEncuesta') fila = item.datosEncuesta?.despachoTrasladoDestino || {}
 
-          const value = fila?.[name] ? String(fila[name]) : ''
+          const value = String(fila?.[name] ?? '')
           return { name: `${modelName}.${name}`, type, prettyName, value }
         })
         .reduce((acc, item) => ({ ...acc, [item.name]: { type: item.type, value: item.value } }), {
@@ -484,26 +482,73 @@ export const cargosRouter = createTRPCRouter({
 
       flat['DatosEncuesta.tieneServidorProv'] = { type: 'string', value: !servidorEnPropiedad ? 'Si' : 'No' }
 
-      const documentoDeaj = (servidorEnPropiedad && item.enlaceDeaj?.datosDeaj?.numDocumento) || ''
-      const documento = item.enlaceCsj?.datosCsj.cedula || documentoDeaj || ''
-      flat['DatosEncuesta.tipoDocumento'] = { type: 'string', value: documento ? 'Cédula de ciudadanía' : '' }
-      flat['DatosEncuesta.documento'] = { type: 'string', value: documento }
-
       const fechaFinProv = item.enlaceDeaj?.datosDeaj?.fechaFin
       let conFechaFin = ''
       if (!servidorEnPropiedad) conFechaFin = fechaFinProv ? 'Si' : 'No'
 
       flat['DatosDeaj.conFechaFin'] = { type: 'string', value: conFechaFin }
 
-      const documentoProv =
-        (!servidorEnPropiedad && item.enlaceCsj?.datosCsj.cedula) || item.enlaceDeaj?.datosDeaj?.numDocumento || ''
-      flat['DatosEncuesta.tipoDocumentoProv'] = {
+      const actoCorrecto = item.datosActoAdministrativo?.actoCorrecto === 'Si' ? true : false
+      const datosActo = item.datosActoAdministrativo
+
+      flat['ActoAdministrativo.articulo'] = { type: 'string', value: actoCorrecto ? datosActo?.articulo || '' : '' }
+      flat['ActoAdministrativo.literal'] = { type: 'string', value: actoCorrecto ? datosActo?.literal || '' : '' }
+      flat['ActoAdministrativo.numeral'] = { type: 'string', value: actoCorrecto ? datosActo?.numeral || '' : '' }
+
+      flat['ActoAdministrativo.tipo'] = {
         type: 'string',
-        value: !servidorEnPropiedad && documentoProv ? 'Cédula de ciudadanía' : '',
+        value: !actoCorrecto ? datosActo?.actoAdministrativo.tipo || '' : '',
       }
-      flat['DatosEncuesta.documentoProv'] = {
+      flat['ActoAdministrativo.numero'] = {
         type: 'string',
-        value: !servidorEnPropiedad && documentoProv ? documentoProv : '',
+        value: !actoCorrecto ? datosActo?.actoAdministrativo.numero || '' : '',
+      }
+      flat['ActoAdministrativo.anio'] = {
+        type: 'string',
+        value: !actoCorrecto ? datosActo?.actoAdministrativo.anio || '' : '',
+      }
+      flat['ActoAdministrativo.articuloCorrecto'] = {
+        type: 'string',
+        value: !actoCorrecto ? datosActo?.articulo || '' : '',
+      }
+      flat['ActoAdministrativo.literalCorrecto'] = {
+        type: 'string',
+        value: !actoCorrecto ? datosActo?.literal || '' : '',
+      }
+      flat['ActoAdministrativo.numeralCorrecto'] = {
+        type: 'string',
+        value: !actoCorrecto ? datosActo?.numeral || '' : '',
+      }
+
+      flat['DatosDeaj.formaProvision'] = !item.datosEncuesta
+        ? { type: 'string', value: '' }
+        : {
+            type: 'string',
+            value:
+              item.datosEncuesta.tieneServidorProv === 'Si'
+                ? 'En provisionalidad'
+                : item.datosEncuesta.tieneServidorProp === 'Si'
+                  ? 'En propiedad'
+                  : 'Cargo vacante',
+          }
+
+      flat['DatosEncuesta.profesion1'] = {
+        type: 'string',
+        value: item.datosEncuesta?.tieneServidorProv
+          ? item.datosEncuesta.profesion1Prov
+          : item.datosEncuesta?.profesion1 || '',
+      }
+      flat['DatosEncuesta.profesion2'] = {
+        type: 'string',
+        value: item.datosEncuesta?.tieneServidorProv
+          ? item.datosEncuesta.profesion2Prov
+          : item.datosEncuesta?.profesion2 || '',
+      }
+      flat['DatosEncuesta.profesion3'] = {
+        type: 'string',
+        value: item.datosEncuesta?.tieneServidorProv
+          ? item.datosEncuesta.profesion3Prov
+          : item.datosEncuesta?.profesion3 || '',
       }
 
       return flat
