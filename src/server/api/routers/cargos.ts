@@ -1,9 +1,19 @@
 import { z } from 'zod'
+import { separarNombre } from '~/lib/utils'
 import { createTRPCRouter, protectedProcedure } from '~/server/api/trpc'
 import { getModelColumns, modelCsj, modelDeaj, modelUdae, orderTableColumns } from './_utils'
-import { separarNombre } from '~/lib/utils'
 
-const udaeColumnsOrder = ['municipioSedeFisica', 'descripcionCargo', 'nombreDespacho']
+const udaeColumnsOrder = [
+  'municipioSedeFisica',
+  'descripcionCargo',
+  'nombreDespacho',
+  'especialidad',
+  'gradoCargo',
+  'tipoActoAdministrativo',
+  'anioActoAdministrativo',
+  'numeroActoAdministrativo',
+  'nombreEncuesta',
+]
 const csjColumnsOrder = ['municipio', 'cargo', 'depacho', 'propiedad']
 const deajColumnsOrder = ['ciudadUbicacionLaboral', 'cargoTitular', 'dependenciaTitular']
 
@@ -11,9 +21,37 @@ export const cargosRouter = createTRPCRouter({
   getPairingDataCsj: protectedProcedure.query(async ({ ctx }) => {
     const datosUdae = await ctx.db.datosUdae.findMany({
       where: { enlaceCsj: null },
+      select: {
+        id: true,
+        municipioSedeFisica: true,
+        descripcionCargo: true,
+        nombreDespacho: true,
+        especialidad: true,
+        gradoCargo: true,
+        tipoActoAdministrativo: true,
+        anioActoAdministrativo: true,
+        numeroActoAdministrativo: true,
+        datosEncuesta: true,
+      },
       orderBy: [{ municipioSedeFisica: 'asc' }, { nombreDespacho: 'asc' }, { descripcionCargo: 'asc' }],
     })
-    const columnsUdae = modelUdae ? orderTableColumns(getModelColumns(modelUdae), udaeColumnsOrder) : []
+    const columnsUdae = modelUdae
+      ? [
+          ...orderTableColumns(
+            getModelColumns({
+              ...modelUdae,
+              fields: modelUdae.fields.filter((field) => udaeColumnsOrder.includes(field.name)),
+            }),
+            udaeColumnsOrder,
+          ),
+          {
+            name: 'nombreEncuesta',
+            type: 'string',
+            prettyName: 'Nombre funcionario en encuesta',
+            modelName: 'DatosUdae',
+          },
+        ]
+      : []
 
     const datosCsj = await ctx.db.datosCsj.findMany({
       where: { enlace: null },
@@ -21,7 +59,15 @@ export const cargosRouter = createTRPCRouter({
     })
     const columnsCsj = modelCsj ? orderTableColumns(getModelColumns(modelCsj), csjColumnsOrder) : []
 
-    return { datosUdae, columnsUdae, datosCsj, columnsCsj }
+    return {
+      datosUdae: datosUdae.map((fila) => ({
+        ...fila,
+        nombreEncuesta: fila.datosEncuesta ? `${fila.datosEncuesta?.nombres} ${fila.datosEncuesta?.apellidos}` : '',
+      })),
+      columnsUdae,
+      datosCsj,
+      columnsCsj,
+    }
   }),
 
   savePairUdaeCsj: protectedProcedure
