@@ -3,14 +3,25 @@
 import { cookies } from 'next/headers'
 import { z } from 'zod'
 import { loginWithCode, logout, requestLoginCode } from '~/lib/auth'
+import { db } from '~/server/db'
 
 const requestLoginSchema = z.object({ username: z.string(), domain: z.string() })
 
 export const requestLoginAction = async (prevState: unknown, formData: FormData) => {
-  const { success, data, error } = requestLoginSchema.safeParse(Object.fromEntries(formData))
+  const { success, data } = requestLoginSchema.safeParse(Object.fromEntries(formData))
   if (!success) return { success: false, message: 'Datos de inicio de sesión no válidos.' }
 
   const username = data.username.toLowerCase().trim()
+
+  const despacho = await db.despacho.findFirst({ where: { email: { startsWith: username } } })
+  const user = await db.user.findFirst({ where: { username } })
+
+  if ((!user || user.role === 'external') && !despacho)
+    return {
+      success: false,
+      message:
+        'El correo electrónico proporcionado no corresponde a un usuario autorizado o al correo electrónico de un despacho.',
+    }
 
   const result = await requestLoginCode(username, data.domain)
   if (!result.success) return { success: false, message: result.message }
@@ -23,7 +34,7 @@ export const requestLoginAction = async (prevState: unknown, formData: FormData)
 const loginWithCodeSchema = z.object({ username: z.string(), code: z.string() })
 
 export const loginWithCodeAction = async (prevState: unknown, formData: FormData) => {
-  const { success, data, error } = loginWithCodeSchema.safeParse(Object.fromEntries(formData))
+  const { success, data } = loginWithCodeSchema.safeParse(Object.fromEntries(formData))
   if (!success) return { success: false, message: 'Datos de verificación inválidos' }
 
   const result = await loginWithCode(data.username, data.code)
