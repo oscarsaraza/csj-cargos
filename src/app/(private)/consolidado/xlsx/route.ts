@@ -1,9 +1,18 @@
 import * as XLSX from 'xlsx'
+import { validateSession } from '~/lib/auth'
+import { db } from '~/server/db'
 import { api } from '~/trpc/server'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
+  const session = await validateSession()
+  if (session.success === false) return new Response('Usuario no autorizado', { status: 403 })
+  const user = await db.user.findFirst({ where: { id: session?.user?.id } })
+  if (!user) return new Response('Usuario no autorizado', { status: 403 })
+  console.info({ user })
+  if (user.role !== 'csj') return new Response('Usuario no autorizado', { status: 403 })
+
   const { columns, registros } = await api.cargos.getConsolidado()
 
   const XLSX_FILE_TYPE = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8'
