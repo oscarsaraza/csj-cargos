@@ -81,8 +81,6 @@ export function EncuestaServidorForm({ datosUdaeId, data, defaults }: EncuestaSe
     const observacionesDespacho = data.get('observacionesDespacho')?.toString() || ''
     const observacionesClasificacion = data.get('observacionesClasificacion')?.toString() || ''
 
-    console.log(servidorPropiedad, servidorProvisionalidad)
-
     save.mutate({
       datosUdaeId,
       cargoExiste,
@@ -600,13 +598,16 @@ export function EncuestaServidorForm({ datosUdaeId, data, defaults }: EncuestaSe
           )}
         </CardContent>
 
-        <CardFooter className="flex justify-center gap-4">
-          <Button variant="secondary" disabled={save.isPending} onClick={() => router.push('/actualizacion')}>
-            Cancelar
-          </Button>
-          <Button type="submit" variant="default" disabled={save.isPending}>
-            Guardar
-          </Button>
+        <CardFooter className="flex flex-col gap-4">
+          <div className="flex justify-center gap-4">
+            <Button variant="secondary" disabled={save.isPending} onClick={() => router.push('/actualizacion')}>
+              Cancelar
+            </Button>
+            <Button type="submit" variant="default" disabled={save.isPending}>
+              Guardar
+            </Button>
+          </div>
+          <div className="font-bold text-red-500">{save.error?.message}</div>
         </CardFooter>
       </Card>
     </form>

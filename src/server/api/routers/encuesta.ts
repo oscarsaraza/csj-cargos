@@ -129,6 +129,13 @@ export const encuestaRouter = createTRPCRouter({
     const familiaresDependientes = parseInt(servidorPropiedad?.familiaresDependientes || '0')
     const familiaresDependientesProv = parseInt(servidorProvisionalidad?.familiaresDependientesProv || '0')
 
+    if (data.cargoExiste === 'Si' && tieneServidorProp === 'No' && tieneServidorProv === 'No')
+      throw new TRPCError({
+        code: 'BAD_REQUEST',
+        message:
+          'Si el cargo existe, debe diligenciar la información de al menos un servidor (provisional o en propiedad).',
+      })
+
     const encuesta = {
       ...data,
       ...servidorPropiedad,
