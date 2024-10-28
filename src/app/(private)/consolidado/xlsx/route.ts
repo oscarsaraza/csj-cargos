@@ -8,7 +8,10 @@ export const dynamic = 'force-dynamic'
 export async function GET() {
   const session = await validateSession()
   if (session.success === false) return new Response('Usuario no autorizado', { status: 403 })
-  const user = await db.user.findFirst({ where: { id: session?.user?.id } })
+  const user = await db.user.findFirst({
+    where: { id: session?.user?.id },
+    select: { id: true, username: true, role: true },
+  })
   if (!user) return new Response('Usuario no autorizado', { status: 403 })
   console.info({ user })
   if (user.role !== 'csj') return new Response('Usuario no autorizado', { status: 403 })

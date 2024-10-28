@@ -14,7 +14,7 @@ export function DescargaXlsxButton() {
   }
 
   return (
-    <Link href="/consolidado/xlsx" onClick={onClick}>
+    <Link href="/consolidado/xlsx" onClick={onClick} prefetch={false}>
       <Button variant="secondary" disabled={clicked} className="my-4 space-x-2">
         <FileSpreadsheet className="h-6 w-6" />
         <span>Descargar consolidado</span>
