@@ -37,7 +37,9 @@ export const loginWithCodeAction = async (prevState: unknown, formData: FormData
   const { success, data } = loginWithCodeSchema.safeParse(Object.fromEntries(formData))
   if (!success) return { success: false, message: 'Datos de verificación inválidos' }
 
-  const result = await loginWithCode(data.username, data.code)
+  const username = data.username.toLowerCase().trim()
+
+  const result = await loginWithCode(username, data.code)
   if (!result.success) return { success: false, message: 'Código de verificación incorrecto' }
 
   cookies().set(result.sessionCookie.name, result.sessionCookie.value, result.sessionCookie.attributes)
