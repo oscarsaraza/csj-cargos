@@ -2,18 +2,10 @@ import { redirect } from 'next/navigation'
 import { UnauthorizedUserMessage } from '~/app/_components/unauthorized-user'
 import { Card, CardContent, CardHeader, CardTitle } from '~/components/ui/card'
 import { Progress } from '~/components/ui/progress'
-import { cn } from '~/lib/utils'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
+import { RouterOutputs } from '~/trpc/react'
 import { api } from '~/trpc/server'
 import { DescargaXlsxButton } from './descarga-xlsx-button'
-
-const bgBymodelName: Record<string, string> = {
-  DatosUdae: 'bg-sky-50',
-  DatosCsj: 'bg-lime-50',
-  DatosDeaj: 'bg-amber-50',
-  ActoAdministrativo: 'bg-pink-50',
-  DatosActo: 'bg-pink-50',
-  DatosEncuesta: 'bg-lime-50',
-}
 
 export default async function Consolidado() {
   const { userId } = await api.users.getLoggedUser()
@@ -29,31 +21,45 @@ export default async function Consolidado() {
   return (
     <div className="w-full max-w-full space-y-4">
       <h1 className="text-2xl font-bold">Consolidado</h1>
+
       <DescargaXlsxButton />
 
       <h1 className="text-2xl font-bold">Avance</h1>
-      <div className="flex flex-row flex-wrap gap-4">
-        <ProgressCard
-          title="Emparejamiento CSJ"
-          description={`${datosAvance.avanceCsj}/${datosAvance.totalUdae}`}
-          progress={datosAvance.porcCsj}
-        />
-        <ProgressCard
-          title="Emparejamiento DEAJ"
-          description={`${datosAvance.avanceDeaj}/${datosAvance.totalDeaj}`}
-          progress={datosAvance.porcDeaj}
-        />
-        <ProgressCard
-          title="Revisión de actos administrativos"
-          description={`${datosAvance.totalActos}/${datosAvance.totalUdae}`}
-          progress={datosAvance.porcActos}
-        />
-        <ProgressCard
-          title="Recolección de información personal"
-          description={`${datosAvance.totalInfoTrabajadores}/${datosAvance.totalUdae}`}
-          progress={datosAvance.porcInfoTrabajadores}
-        />
-      </div>
+      <TarjetasAvance datos={datosAvance} />
+
+      <h1 className="text-2xl font-bold">
+        Despachos con diligenciamiento incompleto ({datosAvance.progresoDespachos.length})
+      </h1>
+      <ProgresoDespachos datos={datosAvance.progresoDespachos} />
+    </div>
+  )
+}
+
+type TarjetasAvanceProps = RouterOutputs['cargos']['getDatosAvance']
+
+function TarjetasAvance({ datos }: { datos: TarjetasAvanceProps }) {
+  return (
+    <div className="flex flex-row flex-wrap gap-4">
+      <ProgressCard
+        title="Emparejamiento CSJ"
+        description={`${datos.avanceCsj}/${datos.totalUdae}`}
+        progress={datos.porcCsj}
+      />
+      <ProgressCard
+        title="Emparejamiento DEAJ"
+        description={`${datos.avanceDeaj}/${datos.totalDeaj}`}
+        progress={datos.porcDeaj}
+      />
+      <ProgressCard
+        title="Revisión de actos administrativos"
+        description={`${datos.totalActos}/${datos.totalUdae}`}
+        progress={datos.porcActos}
+      />
+      <ProgressCard
+        title="Recolección de información personal"
+        description={`${datos.totalInfoTrabajadores}/${datos.totalUdae}`}
+        progress={datos.porcInfoTrabajadores}
+      />
     </div>
   )
 }
@@ -78,5 +84,34 @@ function ProgressCard({ title, description, progress }: ItemProgressCardProps) {
         </div>
       </CardContent>
     </Card>
+  )
+}
+
+function ProgresoDespachos({ datos }: { datos: TarjetasAvanceProps['progresoDespachos'] }) {
+  return (
+    <div className="flex flex-col flex-wrap gap-4">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead className="text-nowrap">Despacho</TableHead>
+            <TableHead className="text-nowrap">Avance de diligenciamiento de cargos</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {datos.map((item) => {
+            return (
+              <TableRow key={item.nombreDespacho}>
+                <TableCell>
+                  {item.nombreDespacho} <span className="text-muted-foreground">{item.email}</span>
+                </TableCell>
+                <TableCell>
+                  {item.diligenciados} de {item.cargos}
+                </TableCell>
+              </TableRow>
+            )
+          })}
+        </TableBody>
+      </Table>
+    </div>
   )
 }

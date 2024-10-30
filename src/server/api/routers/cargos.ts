@@ -571,6 +571,42 @@ export const cargosRouter = createTRPCRouter({
     const totalActos = await ctx.db.enlaceActoAdministrativo.count()
     const totalInfoTrabajadores = await ctx.db.datosEncuesta.count()
 
+    const progresoDespachosSchema = z.array(
+      z.object({
+        cargos: z.number(),
+        diligenciados: z.number(),
+        nombreDespacho: z.string(),
+        email: z.string().optional(),
+      }),
+    )
+    const progresoDespachosRaw = await ctx.db.datosUdae.aggregateRaw({
+      pipeline: [
+        { $lookup: { from: 'DatosEncuesta', localField: '_id', foreignField: 'datosUdaeId', as: 'encuesta' } },
+        { $addFields: { cuentaEncuesta: { $size: '$encuesta' } } },
+        { $group: { _id: '$nombreDespacho', cargos: { $sum: 1 }, diligenciados: { $sum: '$cuentaEncuesta' } } },
+        { $sort: { _id: 1 } },
+        { $lookup: { from: 'Despacho', localField: '_id', foreignField: 'nombre', as: 'despacho' } },
+        { $sort: { _id: 1 } },
+        {
+          $project: {
+            _id: 0,
+            nombreDespacho: '$_id',
+            email: { $first: '$despacho.email' },
+            cargos: 1,
+            diligenciados: 1,
+          },
+        },
+        {
+          $match: {
+            $expr: { $gt: ['$cargos', '$diligenciados'] },
+            $or: [{ email: { $regex: '@' } }, { email: { $exists: false } }],
+          },
+        },
+      ],
+    })
+
+    const { data: progresoDespachos = [] } = progresoDespachosSchema.safeParse(progresoDespachosRaw)
+
     return {
       totalUdae,
       avanceCsj,
@@ -582,6 +618,7 @@ export const cargosRouter = createTRPCRouter({
       porcActos: (totalActos / totalUdae) * 100,
       totalInfoTrabajadores,
       porcInfoTrabajadores: (totalInfoTrabajadores / totalUdae) * 100,
+      progresoDespachos,
     }
   }),
 })
