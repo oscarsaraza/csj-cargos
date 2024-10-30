@@ -14,7 +14,7 @@ export async function GET() {
   })
   if (!user) return new Response('Usuario no autorizado', { status: 403 })
   console.info({ user })
-  if (user.role !== 'csj') return new Response('Usuario no autorizado', { status: 403 })
+  if (user.role !== 'csj' && user.role !== 'deaj') return new Response('Usuario no autorizado', { status: 403 })
 
   const { columns, registros } = await api.cargos.getConsolidado()
 
