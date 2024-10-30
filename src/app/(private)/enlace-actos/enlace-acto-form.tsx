@@ -24,9 +24,10 @@ import { api } from '~/trpc/react'
 type ActoFormProps = {
   datosUdaeId: string
   actosAdministrativosList: ActoAdministrativo[]
+  registrado: boolean
 }
 
-export function EnlaceActoForm({ datosUdaeId, actosAdministrativosList }: ActoFormProps) {
+export function EnlaceActoForm({ datosUdaeId, actosAdministrativosList, registrado = false }: ActoFormProps) {
   const [open, setOpen] = useState(false)
   const router = useRouter()
 
@@ -84,7 +85,7 @@ export function EnlaceActoForm({ datosUdaeId, actosAdministrativosList }: ActoFo
     remove.mutate({ id: datosEnlace.datosActoAdministrativo.id })
   }
 
-  const title = `${datosEnlace?.datosActoAdministrativo?.id ? 'Editar' : 'Registrar'}`
+  const title = `${registrado ? 'Editar' : 'Registrar'}`
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>

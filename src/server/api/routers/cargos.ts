@@ -131,23 +131,26 @@ export const cargosRouter = createTRPCRouter({
       return result
     }),
 
-  getPairingDataActos: protectedProcedure.query(async ({ ctx }) => {
-    const datosUdae = await ctx.db.datosUdae.findMany({
-      where: { datosActoAdministrativo: null },
-      orderBy: [{ municipioSedeFisica: 'asc' }, { nombreDespacho: 'asc' }, { descripcionCargo: 'asc' }],
-    })
-    const columnOrders = [
-      'municipioSedeFisica',
-      'descripcionCargo',
-      'nombreDespacho',
-      'tipoActoAdministrativo',
-      'anioActoAdministrativo',
-      'numeroActoAdministrativo',
-    ]
-    const columnsUdae = modelUdae ? orderTableColumns(getModelColumns(modelUdae), columnOrders) : []
+  getPairingDataActos: protectedProcedure
+    .input(z.object({ mostrarTodos: z.boolean() }))
+    .query(async ({ ctx, input }) => {
+      const datosUdae = await ctx.db.datosUdae.findMany({
+        where: input.mostrarTodos ? {} : { datosActoAdministrativo: null },
+        include: { datosActoAdministrativo: { select: { id: true } } },
+        orderBy: [{ municipioSedeFisica: 'asc' }, { nombreDespacho: 'asc' }, { descripcionCargo: 'asc' }],
+      })
+      const columnOrders = [
+        'municipioSedeFisica',
+        'descripcionCargo',
+        'nombreDespacho',
+        'tipoActoAdministrativo',
+        'anioActoAdministrativo',
+        'numeroActoAdministrativo',
+      ]
+      const columnsUdae = modelUdae ? orderTableColumns(getModelColumns(modelUdae), columnOrders) : []
 
-    return { datosUdae, columnsUdae }
-  }),
+      return { datosUdae, columnsUdae }
+    }),
 
   getConsolidado: protectedProcedure.query(async ({ ctx }) => {
     const registros = await ctx.db.datosUdae.findMany({

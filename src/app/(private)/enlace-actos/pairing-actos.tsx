@@ -5,27 +5,19 @@ import { useEffect, useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { ScrollArea, ScrollBar } from '~/components/ui/scroll-area'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '~/components/ui/table'
-import { api } from '~/trpc/react'
+import { RouterOutputs } from '~/trpc/react'
 import { renderActiveFilters } from '../../_components/pairing/active-filters'
 import { FilterForm } from '../../_components/pairing/filter-form'
-import { type DatosUdaeRow, type FilterItem, ITEMS_PER_PAGE, type TableColumn } from '../../_components/pairing/types'
+import { type FilterItem, ITEMS_PER_PAGE, type TableColumn } from '../../_components/pairing/types'
 import { EnlaceActoForm } from './enlace-acto-form'
 
 type PairingPropTypes = {
-  data: DatosUdaeRow[]
-  columns: TableColumn[]
+  data: RouterOutputs['cargos']['getPairingDataActos']['datosUdae']
+  columns: RouterOutputs['cargos']['getPairingDataActos']['columnsUdae']
   actos: ActoAdministrativo[]
 }
 
-export function PairingActos({ actos }: { actos: ActoAdministrativo[] }) {
-  const { data, error } = api.cargos.getPairingDataActos.useQuery()
-  if (!data || error) return null
-
-  const { datosUdae, columnsUdae } = data
-  return <PairingDumb data={datosUdae} columns={columnsUdae} actos={actos} />
-}
-
-function PairingDumb({ data, columns, actos }: PairingPropTypes) {
+export function PairingActos({ data, columns, actos }: PairingPropTypes) {
   const [filters, setFilters] = useState<FilterItem[]>([])
   const [page, setPage] = useState(1)
 
@@ -52,16 +44,11 @@ function PairingDumb({ data, columns, actos }: PairingPropTypes) {
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="mb-4 flex flex-col space-y-4 lg:flex-row lg:space-x-4 lg:space-y-0">
-        <div className="w-full">
-          <h2 className="mb-2 text-xl font-bold">Revisión de actos administrativos</h2>
-          <FilterForm columns={columns} addFilter={addFilter} />
-          {renderActiveFilters(filters, removeFilter)}
-          {renderTable(columns, paginatedData, page, setPage, actos)}
-        </div>
-      </div>
-    </div>
+    <>
+      <FilterForm columns={columns} addFilter={addFilter} />
+      {renderActiveFilters(filters, removeFilter)}
+      {renderTable(columns, paginatedData, page, setPage, actos)}
+    </>
   )
 }
 
@@ -92,7 +79,11 @@ export const renderTable = (
             {data.map((item) => (
               <TableRow key={item.id}>
                 <TableCell className="w-48">
-                  <EnlaceActoForm datosUdaeId={item.id} actosAdministrativosList={actos} />
+                  <EnlaceActoForm
+                    datosUdaeId={item.id}
+                    actosAdministrativosList={actos}
+                    registrado={!!item.datosActoAdministrativo}
+                  />
                 </TableCell>
                 {filteredColumns.map(({ name }) => (
                   <TableCell className="text-nowrap" key={name}>
