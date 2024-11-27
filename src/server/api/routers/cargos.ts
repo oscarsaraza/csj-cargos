@@ -540,21 +540,15 @@ export const cargosRouter = createTRPCRouter({
 
       flat['DatosEncuesta.profesion1'] = {
         type: 'string',
-        value: item.datosEncuesta?.tieneServidorProv
-          ? item.datosEncuesta.profesion1Prov
-          : item.datosEncuesta?.profesion1 || '',
+        value: item.datosEncuesta?.profesion1Prov || item.datosEncuesta?.profesion1 || '',
       }
       flat['DatosEncuesta.profesion2'] = {
         type: 'string',
-        value: item.datosEncuesta?.tieneServidorProv
-          ? item.datosEncuesta.profesion2Prov
-          : item.datosEncuesta?.profesion2 || '',
+        value: item.datosEncuesta?.profesion2Prov || item.datosEncuesta?.profesion2 || '',
       }
       flat['DatosEncuesta.profesion3'] = {
         type: 'string',
-        value: item.datosEncuesta?.tieneServidorProv
-          ? item.datosEncuesta.profesion3Prov
-          : item.datosEncuesta?.profesion3 || '',
+        value: item.datosEncuesta?.profesion3Prov || item.datosEncuesta?.profesion3 || '',
       }
 
       return flat
